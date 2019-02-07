@@ -26,8 +26,8 @@ def histo(l):
 def histo_trie(l):
 	final = []
 	inter = histo(l)
-	key = inter.keys()
-	val = inter.values()
+	key = list(inter.keys())
+	val = list(inter.values())
 	for i in range(len(key)):
 		indice = 0
 		mini = val[indice]
@@ -117,18 +117,18 @@ def roulette(distribution):
 			return valeur[i]
 	return valeur[len(pourcentage)-1]
 
-#liste = randlist(5)
-#print(liste)
-#print(moyenne(liste))
-#print(histo(liste))
-#print(histo_trie(liste))
-#print(paquet())
-#liste = paquet()
-#random.shuffle(liste)
-#print(liste)
-#print(meme_position(paquet(), liste))
-#print(proba(100000))
-#graph_proba()
-#print(de())
-#print(proba_somme(2,5))
+liste = randlist(5)
+print(liste)
+print(moyenne(liste))
+print(histo(liste))
+print(histo_trie(liste))
+print(paquet())
+liste = paquet()
+random.shuffle(liste)
+print(liste)
+print(meme_position(paquet(), liste))
+print(proba(100000))
+graph_proba()
+print(de())
+print(proba_somme(2,5))
 print(roulette([('P',0.7), ('F',0.3)]))
