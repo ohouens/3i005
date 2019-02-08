@@ -1,7 +1,7 @@
 import numpy as np
 import copy
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+#import matplotlib.pyplot as plt
+#import matplotlib.patches as patches
 import random
 
 
@@ -47,7 +47,7 @@ def choisirAlea(tab):
 	return place
 
 def run(generation, algorithme, T):
-	#print("algorithme choisit: "+nom[algorithme])
+	print("-------Initialisation-------")
 	machines, gain, esperance, moyenne, coups, recolte = generation
 	print(machines)
 	print(gain)
@@ -60,11 +60,14 @@ def run(generation, algorithme, T):
 		#tableau de choix pour choisir uniformement les levier
 		place = algorithme(choix)
 		resultat = jouer(machines, place)
-		print("place: "+str(place))
-		print("resultat: "+str(resultat))
+		#print("place: "+str(place))
+		#print("resultat: "+str(resultat))
 		coups[place] = coups[place]+1
 		recolte[place] = recolte[place] + gain[place]*resultat
 		total += resultat*gain[place]
+	print("esperance: "+str(esperance))
+	print("moyenne: "+str(moyenne))
+	print("total: "+str(total))
 
 
 #print(jouer(l,2))
