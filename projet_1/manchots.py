@@ -39,35 +39,36 @@ def uniformatisation(tableau):
 
 def choisirAlea(tab):
 	temoin = random.randint(0,100)
-	place = 0
+	levier = 0
 	for i in tab:
 		if(temoin < i):
-			return place
-		place += 1
-	return place
+			return levier
+		levier += 1
+	return levier
 
 def run(generation, algorithme, T):
 	print("-------Initialisation-------")
 	machines, gain, esperance, moyenne, coups, recolte = generation
-	print(machines)
-	print(gain)
-	print(esperance)
-	print(coups)
-	print(recolte)
+	print("machines: "+str(machines))
+	print("gains par machines: "+str(gain))
 	choix = uniformatisation(machines)
 	total = 0
+	print("\n\n\n-------TRAITEMENT-------")
 	for i in range(T):
 		#tableau de choix pour choisir uniformement les levier
-		place = algorithme(choix)
-		resultat = jouer(machines, place)
-		#print("place: "+str(place))
-		#print("resultat: "+str(resultat))
-		coups[place] = coups[place]+1
-		recolte[place] = recolte[place] + gain[place]*resultat
-		total += resultat*gain[place]
+		levier = algorithme(choix)
+		resultat = jouer(machines, levier)
+		print("\nlevier: "+str(levier))
+		print("resultat: "+str(resultat))
+		coups[levier] = coups[levier]+1
+		recolte[levier] = recolte[levier] + gain[levier]*resultat
+		moyenne[levier] = recolte[levier]/coups[levier]
+		esperance[levier] = recolte[levier]*1.0/gain[levier]/coups[levier]
+		total += resultat*gain[levier]
+	print("\n\n\n-------TERMINAISON-------")
 	print("esperance: "+str(esperance))
 	print("moyenne: "+str(moyenne))
-	print("total: "+str(total))
+	print("gains total: "+str(total))
 
 
 #print(jouer(l,2))
