@@ -1,7 +1,7 @@
 import numpy as np
 import copy
-#import matplotlib.pyplot as plt
-#import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import random
 
 
@@ -46,13 +46,16 @@ def choisirAlea(tab):
 		levier += 1
 	return levier
 
-def run(generation, algorithme, T):
+def run(generation, algorithme, T, show=True):
 	print("-------Initialisation-------")
 	machines, gain, esperance, moyenne, coups, recolte = generation
 	print("machines: "+str(machines))
 	print("gains par machines: "+str(gain))
 	choix = uniformatisation(machines)
 	total = 0
+	ya = []
+	yb = []
+	x = []
 	print("\n\n\n-------TRAITEMENT-------")
 	for i in range(T):
 		#tableau de choix pour choisir uniformement les levier
@@ -65,12 +68,23 @@ def run(generation, algorithme, T):
 		moyenne[levier] = recolte[levier]/coups[levier]
 		esperance[levier] = recolte[levier]*1.0/gain[levier]/coups[levier]
 		total += resultat*gain[levier]
+		ya.append(esperance[levier])
+		yb.append(machines[levier])
+		x.append(i)
 	print("\n\n\n-------TERMINAISON-------")
 	print("esperance: "+str(esperance))
 	print("moyenne: "+str(moyenne))
 	print("gains total: "+str(total))
+	if(show):
+		plt.plot(x, ya, label='esperance')
+		plt.plot(x, yb, label='moyenne')
+		plt.xlabel('Times')
+		plt.ylabel('chances %')
+		plt.title('Bandit-manchots wins probabilities')
+		plt.legend()
+		plt.show()
 
 
 #print(jouer(l,2))
 #print(uniformatisation(l))
-run(genere(4), choisirAlea, 15)
+run(genere(4), choisirAlea, 50)
