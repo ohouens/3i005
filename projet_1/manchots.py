@@ -46,6 +46,9 @@ def choixGagnant(esperance):
 			m = esperance[i]
 	return indice
 
+def choixGagnantUCB(esperance, coups):
+	pass
+
 def choisirAlea(data, explo=20):
 	choix, esperance, coups, gagnant = data 
 	temoin = random.randint(0,100)
@@ -67,6 +70,13 @@ def choisirEGreedy(data, explo=20):
 	choix, esperance, coups, gagnant = data
 	if(np.sum(np.array(coups)) > explo):
 		return choixGagnant(esperance)
+	else:
+		return choisirAlea(data)
+
+def choisirUCB(data, explo=20):
+	choix, esperance, coups, gagnant = data
+	if(np.sum(np.array(coups)) > explo):
+		return choixGagnantUCB(esperance, coups)
 	else:
 		return choisirAlea(data)
 
