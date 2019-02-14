@@ -37,31 +37,56 @@ def uniformatisation(tableau):
 		final.append(pas*i)
 	return final
 
-def choisirAlea(tab):
+def choixGagnant(esperance):
+	m = esperance[0]
+	indice = 0
+	for i in range(len(esperance)):
+		if(esperance[i] > m):
+			indice = i
+			m = esperance[i]
+	return indice
+
+def choisirAlea(data, explo=20):
+	choix, esperance, coups, gagnant = data 
 	temoin = random.randint(0,100)
 	levier = 0
-	for i in tab:
+	for i in choix:
 		if(temoin < i):
 			return levier
 		levier += 1
 	return levier
 
-def run(generation, algorithme, T, show=True):
+def choisirGreedy(data, explo=20):
+	choix, esperance, coups, gagnant = data
+	if(np.sum(np.array(coups)) > explo):
+		return gagnant
+	else:
+		return choisirAlea(data)
+
+def choisirEGreedy(data, explo=20):
+	choix, esperance, coups, gagnant = data
+	if(np.sum(np.array(coups)) > explo):
+		return choixGagnant(esperance)
+	else:
+		return choisirAlea(data)
+
+def run(generation, algorithme, T, explo=20, show=True):
 	print("-------Initialisation-------")
 	machines, gain, esperance, moyenne, coups, recolte = generation
 	print("machines: "+str(machines))
 	print("gains par machines: "+str(gain))
 	choix = uniformatisation(machines)
 	total = 0
+	gagnant = 0
 	ya = []
 	yb = []
 	x = []
 	print("\n\n\n-------TRAITEMENT-------")
 	for i in range(T):
 		#tableau de choix pour choisir uniformement les levier
-		levier = algorithme(choix)
-		resultat = jouer(machines, levier)
+		levier = algorithme((choix, esperance, coups, gagnant), explo)
 		print("\nlevier: "+str(levier))
+		resultat = jouer(machines, levier)
 		print("resultat: "+str(resultat))
 		coups[levier] = coups[levier]+1
 		recolte[levier] = recolte[levier] + gain[levier]*resultat
@@ -71,6 +96,8 @@ def run(generation, algorithme, T, show=True):
 		ya.append(esperance[levier])
 		yb.append(machines[levier])
 		x.append(i)
+		if(i == explo):
+			gagnant = choixGagnant(esperance)
 	print("\n\n\n-------TERMINAISON-------")
 	print("esperance: "+str(esperance))
 	print("moyenne: "+str(moyenne))
@@ -87,4 +114,6 @@ def run(generation, algorithme, T, show=True):
 
 #print(jouer(l,2))
 #print(uniformatisation(l))
-run(genere(4), choisirAlea, 50)
+#run(genere(4), choisirAlea, 50)
+#run(genere(4), choisirGreedy, 50)
+run(genere(20), choisirEGreedy, 100, 40)
