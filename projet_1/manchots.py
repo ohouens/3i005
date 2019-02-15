@@ -3,6 +3,7 @@ import copy
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import random
+import math
 
 
 nom = ["aleatoire"]
@@ -46,11 +47,20 @@ def choixGagnant(moyenne):
 			m = moyenne[i]
 	return indice
 
-def choixGagnantUCB(moyenne, coups):
-	pass
+def calculUCB(moyenne, coups, t):
+	return moyenne+math.sqrt((2*math.log(t))/coups)
+
+def choixGagnantUCB(moyenne, coups, T):
+	m = calculUCB(moyenne[0], coups[0], T)
+	indice = 0
+	for i in range(len(moyenne)):
+		if(calculUCB(moyenne[i], coups[i], T) > m):
+			indice = i
+			m = calculUCB(moyenne[i], coups[i], T)
+	return indice
 
 def choisirAlea(data, explo=20):
-	choix, moyenne, esperance, coups, gagnant = data 
+	choix, moyenne, esperance, coups, gagnant, t = data 
 	temoin = random.randint(0,100)
 	levier = 0
 	for i in choix:
@@ -60,23 +70,23 @@ def choisirAlea(data, explo=20):
 	return levier
 
 def choisirGreedy(data, explo=20):
-	choix, moyenne, esperance, coups, gagnant = data
+	choix, moyenne, esperance, coups, gagnant, t = data
 	if(np.sum(np.array(coups)) > explo):
 		return gagnant
 	else:
 		return choisirAlea(data)
 
 def choisirEGreedy(data, explo=20):
-	choix, moyenne, esperance, coups, gagnant = data
+	choix, moyenne, esperance, coups, gagnant, t = data
 	if(np.sum(np.array(coups)) > explo):
 		return choixGagnant(moyenne)
 	else:
 		return choisirAlea(data)
 
 def choisirUCB(data, explo=20):
-	choix, moyenne, esperance, coups, gagnant = data
+	choix, moyenne, esperance, coups, gagnant, t = data
 	if(np.sum(np.array(coups)) > explo):
-		return choixGagnantUCB(moyenne, coups)
+		return choixGagnantUCB(moyenne, coups, t)
 	else:
 		return choisirAlea(data)
 
@@ -95,7 +105,7 @@ def run(generation, algorithme, T, explo=20, show=True):
 	print("\n\n\n-------TRAITEMENT-------")
 	for i in range(T):
 		#tableau de choix pour choisir uniformement les levier
-		levier = algorithme((choix, moyenne, esperance, coups, gagnant), explo)
+		levier = algorithme((choix, moyenne, esperance, coups, gagnant, i), explo)
 		print("\nlevier: "+str(levier))
 		resultat = jouer(machines, levier)
 		print("resultat: "+str(resultat))
@@ -126,6 +136,7 @@ def run(generation, algorithme, T, explo=20, show=True):
 
 #print(jouer(l,2))
 #print(uniformatisation(l))
-#run(genere(4), choisirAlea, 50)
-run(genere(4), choisirGreedy, 50)
+#run(genere(4), choisirAlea, 400)
+#run(genere(4), choisirGreedy, 100, 20)
 #run(genere(20), choisirEGreedy, 100, 40)
+run(genere(4), choisirUCB, 100, 30)
