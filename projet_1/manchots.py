@@ -8,7 +8,7 @@ import math
 
 nom = ["aleatoire"]
 l=[0.1,0.2,0.3]
-
+"""test"""
 def jouer(machine, levier):
 	if(random.random() < machine[levier]):
 		return 1
