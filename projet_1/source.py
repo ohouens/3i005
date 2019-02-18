@@ -90,7 +90,8 @@ class MorpionState(State):
         return list(zip(*np.where(self.grid==0)))
     def win(self):
         for i in [-1,1]:
-            if ((i*self.grid.sum(0))).max()==3 or ((i*self.grid.sum(1))).max()==3 or ((i*self.grid)).trace().max()==3 or ((i*np.fliplr(self.grid))).trace().max()==3: return i
+            if ((i*self.grid.sum(0))).max()==3 or ((i*self.grid.sum(1))).max()==3 or ((i*self.grid)).trace().max()==3 or ((i*np.fliplr(self.grid))).trace().max()==3: 
+                return i
         return 0
     def stop(self):
         return self.win()!=0 or (self.grid==0).sum()==0
