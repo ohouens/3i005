@@ -12,13 +12,13 @@ class AgentAlea(Agent):
 		return state.get_actions()[case]
 
 
-"""state = MorpionState()
-print(state.get_actions())
-print(state.grid)
-state.grid[0][0] = -1
-print(state.grid)
-print(state.get_actions())
-"""
+# state = MorpionState()
+# print(state.get_actions())
+# print(state.grid)
+# state.grid[0][0] = -1
+# print(state.grid)
+# print(state.get_actions())
+
 
 """
 jeu = Jeu(MorpionState(), AgentAlea(), AgentAlea())
@@ -27,7 +27,7 @@ print("joueur gagnant: "+str(win))
 print(log)
 """
 
-def jeuxAleatoire(T=10000):
+def jeuxAleatoire(T=1000):
 	j1 = AgentAlea("Ryan")
 	j2 = AgentAlea("Pierre")
 
@@ -58,4 +58,45 @@ def jeuxAleatoire(T=10000):
 	plt.legend()
 	plt.show()
 
-jeuxAleatoire()
+# jeuxAleatoire()
+
+class AgentMontecarlo(Agent):
+	def __init__(self, prenom="zero"):
+			self.prenom = prenom
+			print("un joueur initialisé: "+self.prenom)
+
+	def get_action(self,state,n=3):
+		moyennes = []
+		actions = state.get_actions()
+		j1 = AgentAlea("j1")
+		j2 = AgentAlea("j2")
+
+		
+		for j in range (len(actions)):
+			moyennes.append(0)
+
+		for i in range(n+1):
+			choix = random.randint(0,len(actions))
+			print(choix)
+			a = state
+			while(a.win()==0):
+				jeu = Jeu(a, j1, j2)
+				gagnant, log = jeu.run()
+				"faire jouer les joueurs aléatoirement"
+				if(gagnant == 1):
+					moyennes[choix] += 1
+
+			
+		return (actions[index(max(moyennes))])
+		"mettre à jour moyennes en fonction du resultat"
+		"retourner max(moyennes)"
+
+		
+
+
+j1 = AgentMontecarlo("Pierre")
+j2 = AgentAlea("Ryan")
+jeu = Jeu(MorpionState(), j1, j2)
+win, log = jeu.run()
+print("joueur gagnant: "+str(win))
+print(log)
