@@ -58,23 +58,36 @@ class AgentMontecarlo(Agent):
 		return (actions[esperance.index(max(esperance))])
 
 class AgentUCT(Agent):
-	def __init__(self, prenom):
+	def __init__(self, prenom="zero", parent=-1):
 		self.prenom = prenom
+		self.parent = parent
+		self.enfant = []
+		self.coups = 0
+		self.victoire = 0
 		print("un joueur initialisé: "+self.prenom)
 
 	def get_action(self,state):
-		moyennes = []
-		coups = []
-		esperance = []
 		actions = state.get_actions()
+		for j in range (len(actions)):
+			newState = copy.deepcopy(state)
+			case = newState.get_actions()[j]
+			newState = newState.next(case)
+			self.enfant.append(AgentUCT(str(j), self))
+			self.enfant[j].simule(newState)
+			print("enfant"+str(j)+": "+str(self.enfant[j].victoire)+"/"+str(self.enfant[j].coups)+"\n")
+
+	def simule(self, state):
+		courant = state.courant*-1
 		j1 = AgentAlea("j1")
 		j2 = AgentAlea("j2")
-		arbre = []
-
-		for j in range (len(actions)):
-			moyennes.append(0)
-			esperance.append(0)
-			coups.append(0)
+		v1, v2 = jeux(state, j1, j2, 1, False)
+		self.coups += 1
+		if(courant == 1 and v1>v2):
+			self.victoire += 1
+		elif(courant == -1 and v1<v2):
+			self.victoire += 1
+		else:
+			pass
 
 def graphique(x, y1, y2):
 	plt.plot(x, y1, label='j1')
@@ -116,4 +129,4 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 	print('Pourcentage:\n'+j1.prenom+': '+str(p1)+'\n'+j2.prenom+': '+str(p2))
 	return (p1, p2)
 
-jeux(MorpionState(), AgentAlea("Pierre"), AgentMontecarlo("Ryan",20), 100, True, 1)
+jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan"), 1, True, 1)
