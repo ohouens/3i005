@@ -3,6 +3,8 @@ import random
 import math
 import copy
 
+
+
 class AgentAlea(Agent):
 	def __init__(self, prenom="zero"):
 		self.prenom = prenom
@@ -57,37 +59,102 @@ class AgentMontecarlo(Agent):
 
 		return (actions[esperance.index(max(esperance))])
 
+
 class AgentUCT(Agent):
-	def __init__(self, prenom="zero", parent=-1):
+	def __init__(self, prenom="zero", n=5, parent=-1):
 		self.prenom = prenom
+		self.n = n
 		self.parent = parent
 		self.enfant = []
 		self.coups = 0
 		self.victoire = 0
+		self.courant = 1
+		if(self.parent != -1):
+			self.courant = self.parent.state.courant
 		print("un joueur initialisé: "+self.prenom)
 
 	def get_action(self,state):
-		actions = state.get_actions()
+		self.state = state
+		self.naissance()
+		for i in range(self.n):
+			self.expansion(self.selection())
+		case = self.selection()
+		for i in range(len(self.enfant)):
+			print("enfant"+self.enfant[i].prenom+": ("+str(self.enfant[i].victoire)+")victoires/("+str(self.enfant[i].victoire)+")coups")
+			if(case is self.enfant[i]):
+				return state.get_actions()[i]
+		print("ERRRRRRRRRROOOOR: no children found")
+		exit(0)
+
+	def expansion(self, agent):
+		agent.naissance()
+		if(len(agent.enfant) == 0):
+			return retroPropage(agent)
+		else:
+			agentInter = agent.selection()
+			agentInter.simule(agentInter.state)
+			return agentInter
+
+	def retroPropage(self, agent):
+		agentBis = agent
+		while(agentBis.parent != -1):
+			agentBis.parent.victoire += agentBis.victoire
+			agentBis.parent.coups += agentBis.coups
+			agentBis = agentBis.parent
+		return agent
+
+	def naissance(self):
+		actions = self.state.get_actions()
 		for j in range (len(actions)):
-			newState = copy.deepcopy(state)
+			newState = copy.deepcopy(self.state)
 			case = newState.get_actions()[j]
 			newState = newState.next(case)
-			self.enfant.append(AgentUCT(str(j), self))
+			self.enfant.append(AgentUCT(self.prenom+"_"+str(j), 0, self))
+			self.enfant[j].courant = newState.courant*-1
 			self.enfant[j].simule(newState)
-			print("enfant"+str(j)+": "+str(self.enfant[j].victoire)+"/"+str(self.enfant[j].coups)+"\n")
+			print("enfant"+self.prenom+": "+str(self.enfant[j].victoire)+"/"+str(self.enfant[j].coups)+"\n")
 
 	def simule(self, state):
-		courant = state.courant*-1
+		self.state = state
 		j1 = AgentAlea("j1")
 		j2 = AgentAlea("j2")
-		v1, v2 = jeux(state, j1, j2, 1, False)
+		v1, v2 = jeux(self.state, j1, j2, 1, False)
 		self.coups += 1
-		if(courant == 1 and v1>v2):
+		if(self.courant == 1 and v1>v2):
 			self.victoire += 1
-		elif(courant == -1 and v1<v2):
+		elif(self.courant == -1 and v1<v2):
 			self.victoire += 1
 		else:
 			pass
+		return (self.victoire, self.coups)
+
+	def selection(self):
+		agent = self
+		while(len(agent.enfant) != 0 and agent.coups != 0):
+			victoire = []
+			coups = []
+			for e in agent.enfant:
+				victoire.append(e.victoire)
+				coups.append(e.coups)
+			nAgent = self.selectionUCB(victoire, coups, np.sum(coups))
+			agent = agent.enfant[nAgent]
+		return agent
+
+	def calculUCB(self, victoire, coups, t):
+		if(coups == 0):
+			return 0
+		return victoire+math.sqrt((2*math.log(t))/coups)
+
+	def selectionUCB(self, victoire, coups, T):
+		m = self.calculUCB(victoire[0], coups[0], T)
+		indice = 0
+		for i in range(len(victoire)):
+			if(self.calculUCB(victoire[i], coups[i], T) > m):
+				indice = i
+				m = self.calculUCB(victoire[i], coups[i], T)
+		return indice
+
+
 
 def graphique(x, y1, y2):
 	plt.plot(x, y1, label='j1')
@@ -97,6 +164,7 @@ def graphique(x, y1, y2):
 	plt.title('Morpions')
 	plt.legend()
 	plt.show()
+
 
 def jeux(state, j1, j2, T=500, show=True, pause=4):
 	if(pause > 5):
@@ -129,4 +197,6 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 	print('Pourcentage:\n'+j1.prenom+': '+str(p1)+'\n'+j2.prenom+': '+str(p2))
 	return (p1, p2)
 
-jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan"), 1, True, 1)
+
+
+jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan", 20), 15, True, 1)
