@@ -19,7 +19,7 @@ class AgentMontecarlo(Agent):
 			self.n = n
 			print("un joueur initialisé: "+self.prenom)
 
-	def get_action(self,state,n=50):
+	def get_action(self,state):
 		moyennes = []
 		coups = []
 		esperance = []
@@ -36,6 +36,7 @@ class AgentMontecarlo(Agent):
 			print('partie '+str(i)+' aleatoire')
 			newState = copy.deepcopy(state)
 			courant = newState.courant
+			print('courant: '+str(courant))
 			choix = random.randint(0,len(actions)-1)
 			coups[choix] += 1
 			print("actions: "+str(len(actions)))
@@ -55,6 +56,25 @@ class AgentMontecarlo(Agent):
 				esperance[i] = moyennes[i]/coups[i]
 
 		return (actions[esperance.index(max(esperance))])
+
+class AgentUCT(Agent):
+	def __init__(self, prenom):
+		self.prenom = prenom
+		print("un joueur initialisé: "+self.prenom)
+
+	def get_action(self,state):
+		moyennes = []
+		coups = []
+		esperance = []
+		actions = state.get_actions()
+		j1 = AgentAlea("j1")
+		j2 = AgentAlea("j2")
+		arbre = []
+
+		for j in range (len(actions)):
+			moyennes.append(0)
+			esperance.append(0)
+			coups.append(0)
 
 def graphique(x, y1, y2):
 	plt.plot(x, y1, label='j1')
@@ -81,8 +101,11 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 		win, log = jeu.run()
 		if(win == 1):
 			somme1 += 1
-		else:
+		elif(win == -1):
 			somme2 += 1
+		else:
+			somme1 += 0.5
+			somme2 += 0.5
 		x.append(i)
 		partiesJ1.append(somme1)
 		partiesJ2.append(somme2)
@@ -93,4 +116,4 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 	print('Pourcentage:\n'+j1.prenom+': '+str(p1)+'\n'+j2.prenom+': '+str(p2))
 	return (p1, p2)
 
-jeux(MorpionState(), AgentMontecarlo("Pierre", 10), AgentMontecarlo("Ryan", 30), 10, True, 1)
+jeux(MorpionState(), AgentAlea("Pierre"), AgentMontecarlo("Ryan",20), 100, True, 1)
