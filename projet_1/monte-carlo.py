@@ -8,7 +8,7 @@ import copy
 class AgentAlea(Agent):
 	def __init__(self, prenom="zero"):
 		self.prenom = prenom
-		print("un joueur initialisé: "+self.prenom)
+		#print("un joueur initialisé: "+self.prenom)
 
 	def get_action(self,state):
 		case = random.randint(0, len(state.get_actions())-1)
@@ -66,6 +66,7 @@ class AgentUCT(Agent):
 		self.n = n
 		self.parent = parent
 		self.enfant = []
+		self.retro = False
 		self.coups = 0
 		self.victoire = 0
 		self.courant = 1
@@ -77,31 +78,37 @@ class AgentUCT(Agent):
 		self.state = state
 		self.naissance()
 		for i in range(self.n):
-			self.expansion(self.selection())
-		case = self.selection()
+			current = self.expansion(self.selection())
+			current.retroPropage()
+		case = self.selection(False)
+		print("SELECTION: "+str(case.prenom)+", son parent: "+str(case.parent.prenom))
+		print(state.get_actions())
 		for i in range(len(self.enfant)):
-			print("enfant"+self.enfant[i].prenom+": ("+str(self.enfant[i].victoire)+")victoires/("+str(self.enfant[i].victoire)+")coups")
+			print("enfant"+self.enfant[i].prenom+": ("+str(self.enfant[i].victoire)+")victoires/("+str(self.enfant[i].coups)+")coups")
 			if(case is self.enfant[i]):
+				self.victoire = 0
+				self.coups = 0
+				self.enfant.clear()
 				return state.get_actions()[i]
 		print("ERRRRRRRRRROOOOR: no children found")
 		exit(0)
 
 	def expansion(self, agent):
-		agent.naissance()
 		if(len(agent.enfant) == 0):
-			return retroPropage(agent)
-		else:
-			agentInter = agent.selection()
-			agentInter.simule(agentInter.state)
-			return agentInter
+			agent.naissance()
+		agentInter = agent.selection()
+		agentInter.simule()
+		return agentInter
 
-	def retroPropage(self, agent):
-		agentBis = agent
-		while(agentBis.parent != -1):
-			agentBis.parent.victoire += agentBis.victoire
-			agentBis.parent.coups += agentBis.coups
-			agentBis = agentBis.parent
-		return agent
+	def retroPropage(self):
+		agent = self
+		while(agent.parent != -1):
+			if(not self.retro):
+				agent.parent.victoire += agent.victoire
+				agent.parent.coups += agent.coups
+				agent.retro = True
+			agent = agent.parent
+		return (agent.victoire, agent.coups)
 
 	def naissance(self):
 		actions = self.state.get_actions()
@@ -111,11 +118,11 @@ class AgentUCT(Agent):
 			newState = newState.next(case)
 			self.enfant.append(AgentUCT(self.prenom+"_"+str(j), 0, self))
 			self.enfant[j].courant = newState.courant*-1
-			self.enfant[j].simule(newState)
+			self.enfant[j].state = newState
+			self.enfant[j].simule()
 			print("enfant"+self.prenom+": "+str(self.enfant[j].victoire)+"/"+str(self.enfant[j].coups)+"\n")
 
-	def simule(self, state):
-		self.state = state
+	def simule(self):
 		j1 = AgentAlea("j1")
 		j2 = AgentAlea("j2")
 		v1, v2 = jeux(self.state, j1, j2, 1, False)
@@ -128,7 +135,7 @@ class AgentUCT(Agent):
 			pass
 		return (self.victoire, self.coups)
 
-	def selection(self):
+	def selection(self, recursive=True):
 		agent = self
 		while(len(agent.enfant) != 0 and agent.coups != 0):
 			victoire = []
@@ -137,7 +144,11 @@ class AgentUCT(Agent):
 				victoire.append(e.victoire)
 				coups.append(e.coups)
 			nAgent = self.selectionUCB(victoire, coups, np.sum(coups))
-			agent = agent.enfant[nAgent]
+			enfant = agent.enfant[nAgent]
+			if(recursive):
+				agent = enfant
+			else:
+				return enfant
 		return agent
 
 	def calculUCB(self, victoire, coups, t):
@@ -177,7 +188,8 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 	partiesJ2 = []
 
 	for i in range(T):
-		print("-------------JEU "+str(i)+"-------------")
+		if(show):
+			print("-------------JEU "+str(i)+"-------------")
 		jeu = Jeu(state, j1, j2)
 		win, log = jeu.run()
 		if(win == 1):
@@ -194,9 +206,10 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 			graphique(x, partiesJ1, partiesJ2)
 	p1 = somme1*100/T
 	p2 = somme2*100/T
-	print('Pourcentage:\n'+j1.prenom+': '+str(p1)+'\n'+j2.prenom+': '+str(p2))
+	if(show):
+		print('Pourcentage:\n'+j1.prenom+': '+str(p1)+'\n'+j2.prenom+': '+str(p2))
 	return (p1, p2)
 
 
 
-jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan", 20), 15, True, 1)
+jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan", 20), 100, True, 1)
