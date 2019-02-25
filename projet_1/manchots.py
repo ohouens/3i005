@@ -140,7 +140,7 @@ def run(generation, algorithme, T, explo=20, show=True):
 #print(jouer(l,2))
 #print(uniformatisation(l))
 machines=genere(10)#avoir les memes valeurs pour comparer les algo
-run(machines, choisirAlea, 400)
+run(machines, choisirAlea, 100)
 run(machines, choisirGreedy, 100, 20)
-run(machines, choisirEGreedy, 100, 40)
-run(machines, choisirUCB, 100, 30)
+run(machines, choisirEGreedy, 100, 20)
+run(machines, choisirUCB, 100, 20)
