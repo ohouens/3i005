@@ -23,7 +23,7 @@ def genere(nombre):
 	coups = []
 	recolte = []
 	for i in range(nombre):
-		machine.append(random.random())
+		machine.append(random.random()/8)#pour avoir au maximum une proba max = 0,125
 		gain.append(random.randint(1,500))
 		esperance.append(0)
 		moyenne.append(0)
@@ -48,7 +48,10 @@ def choixGagnant(moyenne):
 	return indice
 
 def calculUCB(moyenne, coups, t):
-	return moyenne+math.sqrt((2*math.log(t))/coups)
+	if t<=0 or 2*math.log(t) > 0 or coups == 0:
+		return moyenne
+	else : 
+		return moyenne+math.sqrt((2*math.log(t))/coups)
 
 def choixGagnantUCB(moyenne, coups, T):
 	m = calculUCB(moyenne[0], coups[0], T)
@@ -106,9 +109,9 @@ def run(generation, algorithme, T, explo=20, show=True):
 	for i in range(T):
 		#tableau de choix pour choisir uniformement les levier
 		levier = algorithme((choix, moyenne, esperance, coups, gagnant, i), explo)
-		print("\nlevier: "+str(levier))
+		#print("\nlevier: "+str(levier))
 		resultat = jouer(machines, levier)
-		print("resultat: "+str(resultat))
+		#print("resultat: "+str(resultat))
 		coups[levier] = coups[levier]+1
 		recolte[levier] = recolte[levier] + gain[levier]*resultat
 		moyenne[levier] = recolte[levier]/coups[levier]
@@ -136,7 +139,8 @@ def run(generation, algorithme, T, explo=20, show=True):
 
 #print(jouer(l,2))
 #print(uniformatisation(l))
-#run(genere(4), choisirAlea, 400)
-#run(genere(4), choisirGreedy, 100, 20)
-#run(genere(20), choisirEGreedy, 100, 40)
-run(genere(4), choisirUCB, 100, 30)
+machines=genere(10)#avoir les memes valeurs pour comparer les algo
+run(machines, choisirAlea, 400)
+run(machines, choisirGreedy, 100, 20)
+run(machines, choisirEGreedy, 100, 40)
+run(machines, choisirUCB, 100, 30)
