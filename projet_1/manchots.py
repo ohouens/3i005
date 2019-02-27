@@ -68,13 +68,7 @@ def choixGagnantUCB(moyenne, coups, T):
 
 def choisirAlea(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data 
-	temoin = random.randint(0,100)
-	levier = 0
-	for i in choix:
-		if(temoin < i):
-			return levier
-		levier += 1
-	return levier
+	return random.randint(0, len(choix)-1)
 
 def choisirGreedy(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data
@@ -83,12 +77,16 @@ def choisirGreedy(data, explo=20):
 	else:
 		return choisirAlea(data)
 
-def choisirEGreedy(data, explo=20):
+def choisirEGreedy(data, explo=20, e=0.2):
 	choix, moyenne, esperance, coups, gagnant, t = data
 	if(np.sum(np.array(coups)) > explo):
-		return choixGagnant(moyenne)
-	else:
 		return choisirAlea(data)
+	else:
+		a = random.random()
+		if(a < e):
+			return choisirAlea(data)
+		else:	
+			return choixGagnant(moyenne)
 
 def choisirUCB(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data
@@ -147,7 +145,15 @@ run(genere(200), choisirGreedy, 1000, 500)
 run(genere(200), choisirEGreedy, 1000, 500)
 run(genere(200), choisirUCB, 1000, 500)
 
-def experience(epsilon, T, quantite):
-	regret_alea
+"""
+def experience(T, quantite):
+	regret_alea = []
+	regret_greedy = []
+	regret_eGreedy = []
+	regret_UCB = []
 	for i in range(25):
-		pass
+		regret_alea.append(run(genere(quantite), choisirAlea, T)
+		regret_greedy.append(run(genere(quantite), choisirGreedy, T, eps)
+		regret_eGreedy.append(run(genere(quantite), choisirEGreedy, T)
+		regret_UCB.append(run(genere(quantite), choisirUCB, T)
+"""	
