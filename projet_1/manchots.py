@@ -25,10 +25,11 @@ def genere(nombre):
 	coups = []
 	recolte = []
 	for i in range(nombre):
-		machine.append(proba_fixe[i])
-		gain.append(gain_fixe[i])
-		#machine.append(random.random())
+		#machine.append(proba_fixe[i])
+		#gain.append(gain_fixe[i])
+		machine.append(random.random())
 		#gain.append(random.randint(1,500))
+		gain.append(1)
 		esperance.append(0)
 		moyenne.append(0)
 		coups.append(0)
@@ -52,6 +53,8 @@ def choixGagnant(moyenne):
 	return indice
 
 def calculUCB(moyenne, coups, t):
+	if(coups == 0 or moyenne == 0):
+		return 1
 	return moyenne+math.sqrt((2*math.log(t))/coups)
 
 def choixGagnantUCB(moyenne, coups, T):
@@ -89,10 +92,7 @@ def choisirEGreedy(data, explo=20):
 
 def choisirUCB(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data
-	if(np.sum(np.array(coups)) > explo):
-		return choixGagnantUCB(moyenne, coups, t)
-	else:
-		return choisirAlea(data)
+	return choixGagnantUCB(moyenne, coups, t)
 
 def run(generation, algorithme, T, explo=20, show=True):
 	print("-------Initialisation-------")
@@ -118,16 +118,18 @@ def run(generation, algorithme, T, explo=20, show=True):
 		moyenne[levier] = recolte[levier]/coups[levier]
 		esperance[levier] = recolte[levier]*1.0/gain[levier]/coups[levier]
 		total += resultat*gain[levier]
-		maximal += gain[levier]*machines[levier]
+		maximal += gain[levier]
 		ya.append(total)
 		yb.append(maximal)
 		x.append(i)
 		if(i == explo):
 			gagnant = choixGagnant(moyenne)
+		regret = maximal - total
 	print("\n\n\n-------TERMINAISON-------")
 	print("esperance: "+str(esperance))
 	print("moyenne: "+str(moyenne))
 	print("gains total: "+str(total))
+	print("regret: "+str(regret))
 	if(show):
 		plt.plot(x, ya, label='gain du joueur')
 		plt.plot(x, yb, label='gain maximal espéré')
@@ -136,11 +138,16 @@ def run(generation, algorithme, T, explo=20, show=True):
 		plt.title('Bandit-manchots ('+str(algorithme)+')')
 		plt.legend()
 		plt.show()
-
+	return regret
 
 #print(jouer(l,2))
 #print(uniformatisation(l))
-run(genere(4), choisirAlea, 1000)
-run(genere(4), choisirGreedy, 1000, 20)
-run(genere(4), choisirEGreedy, 1000, 20)
-run(genere(4), choisirUCB, 1000, 20)
+run(genere(200), choisirAlea, 1000)
+run(genere(200), choisirGreedy, 1000, 500)
+run(genere(200), choisirEGreedy, 1000, 500)
+run(genere(200), choisirUCB, 1000, 500)
+
+def experience(epsilon, T, quantite):
+	regret_alea
+	for i in range(25):
+		pass
