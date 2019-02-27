@@ -85,10 +85,11 @@ def choisirGreedy(data, explo=20):
 
 def choisirEGreedy(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data
-	if(np.sum(np.array(coups)) > explo):
-		return choixGagnant(moyenne)
-	else:
+	if(random.random() < explo):
 		return choisirAlea(data)
+		
+	else:
+		return choixGagnant(moyenne)
 
 def choisirUCB(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data
@@ -110,9 +111,9 @@ def run(generation, algorithme, T, explo=20, show=True):
 	for i in range(T):
 		#tableau de choix pour choisir uniformement les levier
 		levier = algorithme((choix, moyenne, esperance, coups, gagnant, i), explo)
-		print("\nlevier: "+str(levier))
+		#print("\nlevier: "+str(levier))
 		resultat = jouer(machines, levier)
-		print("resultat: "+str(resultat))
+		#print("resultat: "+str(resultat))
 		coups[levier] = coups[levier]+1
 		recolte[levier] = recolte[levier] + gain[levier]*resultat
 		moyenne[levier] = recolte[levier]/coups[levier]
@@ -126,9 +127,9 @@ def run(generation, algorithme, T, explo=20, show=True):
 			gagnant = choixGagnant(moyenne)
 		regret = maximal - total
 	print("\n\n\n-------TERMINAISON-------")
-	print("esperance: "+str(esperance))
-	print("moyenne: "+str(moyenne))
-	print("gains total: "+str(total))
+	# print("esperance: "+str(esperance))
+	# print("moyenne: "+str(moyenne))
+	# print("gains total: "+str(total))
 	print("regret: "+str(regret))
 	if(show):
 		plt.plot(x, ya, label='gain du joueur')
@@ -144,7 +145,7 @@ def run(generation, algorithme, T, explo=20, show=True):
 #print(uniformatisation(l))
 run(genere(200), choisirAlea, 1000)
 run(genere(200), choisirGreedy, 1000, 500)
-run(genere(200), choisirEGreedy, 1000, 500)
+run(genere(200), choisirEGreedy, 1000, 0.1)
 run(genere(200), choisirUCB, 1000, 500)
 
 def experience(epsilon, T, quantite):
