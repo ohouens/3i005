@@ -34,30 +34,45 @@ class AgentMontecarlo(Agent):
 			esperance.append(0)
 			coups.append(0)
 
-		for i in range(self.n):
+		for i in range(len(actions)):
+			courant = state.courant
 			print('partie '+str(i)+' aleatoire')
-			newState = copy.deepcopy(state)
-			courant = newState.courant
+			print('courant: '+str(courant))
+			coups[i] += 1
+			case = state.get_actions()[i]
+			newState = state.next(case)
+			v1, v2 = jeux(newState, j1, j2, 1, False)
+			if(courant == 1):
+				moyennes[i] += v1
+			else:
+				moyennes[i] += v2
+
+		for i in range(self.n):
+			courant = state.courant
+			print('partie '+str(i)+' aleatoire')
 			print('courant: '+str(courant))
 			choix = random.randint(0,len(actions)-1)
 			coups[choix] += 1
-			print("actions: "+str(len(actions)))
-			print('choix: '+str(choix))
-			case = newState.get_actions()[choix]
-			newState = newState.next(case)
+			case = state.get_actions()[choix]
+			newState = state.next(case)
 			v1, v2 = jeux(newState, j1, j2, 1, False)
 			if(courant == 1):
 				moyennes[choix] += v1
 			else:
 				moyennes[choix] += v2
 
-		for i in range(len(coups)):
-			if[coups[i]==0]:
-				esperance[i] = 0
+		for i in range(len(actions)):
+			if(coups[i]==0):
+				print("probleme")
+				print(coups)
+				print(i)
+				print(coups[i])
+				exit(0)
 			else:
 				esperance[i] = moyennes[i]/coups[i]
-
-		return (actions[esperance.index(max(esperance))])
+		#print(esperance)
+		#exit(0)
+		return actions[esperance.index(max(esperance))]
 
 
 class AgentUCT(Agent):
@@ -66,7 +81,6 @@ class AgentUCT(Agent):
 		self.n = n
 		self.parent = parent
 		self.enfant = []
-		self.retro = False
 		self.coups = 0
 		self.victoire = 0
 		self.courant = 1
@@ -79,7 +93,6 @@ class AgentUCT(Agent):
 		self.naissance()
 		for i in range(self.n):
 			current = self.expansion(self.selection())
-			current.retroPropage()
 		case = self.selection(False)
 		print("SELECTION: "+str(case.prenom)+", son parent: "+str(case.parent.prenom))
 		print(state.get_actions())
@@ -90,23 +103,23 @@ class AgentUCT(Agent):
 				self.coups = 0
 				self.enfant.clear()
 				return state.get_actions()[i]
-		print("ERRRRRRRRRROOOOR: no children found")
+		print("ERRRRRRRRRROOOOR: no child found")
 		exit(0)
 
 	def expansion(self, agent):
 		if(len(agent.enfant) == 0):
 			agent.naissance()
-		agentInter = agent.selection()
-		agentInter.simule()
-		return agentInter
+		else:
+			agentInter = agent.selection()
+			agentInter.simule()
+			agentInter.retroPropage()
+		return agent.selection()
 
 	def retroPropage(self):
 		agent = self
 		while(agent.parent != -1):
-			if(not self.retro):
-				agent.parent.victoire += agent.victoire
-				agent.parent.coups += agent.coups
-				agent.retro = True
+			agent.parent.victoire += agent.victoire
+			agent.parent.coups += agent.coups
 			agent = agent.parent
 		return (agent.victoire, agent.coups)
 
@@ -152,9 +165,9 @@ class AgentUCT(Agent):
 		return agent
 
 	def calculUCB(self, victoire, coups, t):
-		if(coups == 0):
-			return 0
-		return victoire+math.sqrt((2*math.log(t))/coups)
+		if(coups == 0 or victoire == 0):
+			return 0.9
+		return (victoire/coups)+math.sqrt((2*math.log(t))/coups)
 
 	def selectionUCB(self, victoire, coups, T):
 		m = self.calculUCB(victoire[0], coups[0], T)
@@ -212,4 +225,4 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 
 
 
-jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan", 20), 100, True, 1)
+jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan", 100), 100, True, 1)
