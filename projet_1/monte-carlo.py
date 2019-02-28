@@ -86,7 +86,7 @@ class AgentUCT(Agent):
 		self.courant = 1
 		if(self.parent != -1):
 			self.courant = self.parent.state.courant
-		print("un joueur initialisé: "+self.prenom)
+		#print("un joueur initialisé: "+self.prenom)
 
 	def get_action(self,state):
 		self.state = state
@@ -94,10 +94,12 @@ class AgentUCT(Agent):
 		for i in range(self.n):
 			current = self.expansion(self.selection())
 		case = self.selection(False)
-		print("SELECTION: "+str(case.prenom)+", son parent: "+str(case.parent.prenom))
-		print(state.get_actions())
+		#print(self.victoire, self.coups)
+		#print(case.victoire, case.coups)
+		#print("SELECTION: "+str(case.prenom)+", son parent: "+str(case.parent.prenom))
+		#print(state.get_actions())
 		for i in range(len(self.enfant)):
-			print("enfant"+self.enfant[i].prenom+": ("+str(self.enfant[i].victoire)+")victoires/("+str(self.enfant[i].coups)+")coups")
+			#print("enfant"+self.enfant[i].prenom+": ("+str(self.enfant[i].victoire)+")victoires/("+str(self.enfant[i].coups)+")coups")
 			if(case is self.enfant[i]):
 				self.victoire = 0
 				self.coups = 0
@@ -110,30 +112,27 @@ class AgentUCT(Agent):
 		if(len(agent.enfant) == 0):
 			agent.naissance()
 		else:
-			agentInter = agent.selection()
-			agentInter.simule()
-			agentInter.retroPropage()
+			agent.selection().simule()
 		return agent.selection()
 
-	def retroPropage(self):
+	def retroPropage(self, victoire):
 		agent = self
 		while(agent.parent != -1):
-			agent.parent.victoire += agent.victoire
-			agent.parent.coups += agent.coups
+			agent.parent.victoire += victoire
+			agent.parent.coups += 1
 			agent = agent.parent
 		return (agent.victoire, agent.coups)
 
 	def naissance(self):
 		actions = self.state.get_actions()
 		for j in range (len(actions)):
-			newState = copy.deepcopy(self.state)
-			case = newState.get_actions()[j]
-			newState = newState.next(case)
+			case = self.state.get_actions()[j]
+			newState = self.state.next(case)
 			self.enfant.append(AgentUCT(self.prenom+"_"+str(j), 0, self))
 			self.enfant[j].courant = newState.courant*-1
 			self.enfant[j].state = newState
 			self.enfant[j].simule()
-			print("enfant"+self.prenom+": "+str(self.enfant[j].victoire)+"/"+str(self.enfant[j].coups)+"\n")
+			#print("enfant"+self.prenom+": "+str(self.enfant[j].victoire)+"/"+str(self.enfant[j].coups)+"\n")
 
 	def simule(self):
 		j1 = AgentAlea("j1")
@@ -142,11 +141,12 @@ class AgentUCT(Agent):
 		self.coups += 1
 		if(self.courant == 1 and v1>v2):
 			self.victoire += 1
+			return self.retroPropage(1)
 		elif(self.courant == -1 and v1<v2):
 			self.victoire += 1
+			return self.retroPropage(1)
 		else:
-			pass
-		return (self.victoire, self.coups)
+			return self.retroPropage(0)
 
 	def selection(self, recursive=True):
 		agent = self
@@ -165,8 +165,6 @@ class AgentUCT(Agent):
 		return agent
 
 	def calculUCB(self, victoire, coups, t):
-		if(coups == 0 or victoire == 0):
-			return 0.9
 		return (victoire/coups)+math.sqrt((2*math.log(t))/coups)
 
 	def selectionUCB(self, victoire, coups, T):
@@ -227,4 +225,4 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 
 
 
-jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan", 100), 100, True, 1)
+jeux(MorpionState(), AgentMontecarlo("Pierre", 20), AgentUCT("Ryan", 20), 30, True, 1)

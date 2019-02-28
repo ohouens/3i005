@@ -5,11 +5,9 @@ import matplotlib.patches as patches
 import random
 import math
 
-
-nom = ["aleatoire"]
-l=[0.1,0.2,0.3]
-proba_fixe=[0.2, 0.5, 0.012, 0.4]
-gain_fixe=[4, 1, 50, 5]
+proba_fixe=[]
+for i in range(1000):
+	proba_fixe.append(random.random())
 
 def jouer(machine, levier):
 	if(random.random() < machine[levier]):
@@ -25,10 +23,8 @@ def genere(nombre):
 	coups = []
 	recolte = []
 	for i in range(nombre):
-		#machine.append(proba_fixe[i])
-		#gain.append(gain_fixe[i])
-		machine.append(random.random())
-		#gain.append(random.randint(1,500))
+		machine.append(proba_fixe[i])
+		#machine.append(random.random())
 		gain.append(1)
 		esperance.append(0)
 		moyenne.append(0)
@@ -83,23 +79,11 @@ def choisirGreedy(data, explo=20):
 
 def choisirEGreedy(data, explo=20, e=0.2):
 	choix, moyenne, esperance, coups, gagnant, t = data
-<<<<<<< HEAD
-	if(np.sum(np.array(coups)) > explo):
-		return choisirAlea(data)
-	else:
-		a = random.random()
-		if(a < e):
-			return choisirAlea(data)
-		else:	
-			return choixGagnant(moyenne)
-=======
 	if(random.random() < explo):
 		return choisirAlea(data)
 		
 	else:
 		return choixGagnant(moyenne)
-
->>>>>>> 631e10949ac701f959f7ace64aa582fa17e6e710
 
 
 def run(generation, algorithme, T, explo=20, show=True):
@@ -142,37 +126,6 @@ def run(generation, algorithme, T, explo=20, show=True):
 	# print("moyenne: "+str(moyenne))
 	# print("gains total: "+str(total))
 	print("regret: "+str(regret))
-<<<<<<< HEAD
-	if(show):
-		plt.plot(x, ya, label='gain du joueur')
-		plt.plot(x, yb, label='gain maximal espéré')
-		plt.xlabel('Times(moves)')
-		plt.ylabel('gains(€)')
-		plt.title('Bandit-manchots ('+str(algorithme)+')')
-		plt.legend()
-		plt.show()
-	return regret
-
-#print(jouer(l,2))
-#print(uniformatisation(l))
-run(genere(200), choisirAlea, 1000)
-run(genere(200), choisirGreedy, 1000, 500)
-run(genere(200), choisirEGreedy, 1000, 500)
-run(genere(200), choisirUCB, 1000, 500)
-
-"""
-def experience(T, quantite):
-	regret_alea = []
-	regret_greedy = []
-	regret_eGreedy = []
-	regret_UCB = []
-	for i in range(25):
-		regret_alea.append(run(genere(quantite), choisirAlea, T)
-		regret_greedy.append(run(genere(quantite), choisirGreedy, T, eps)
-		regret_eGreedy.append(run(genere(quantite), choisirEGreedy, T)
-		regret_UCB.append(run(genere(quantite), choisirUCB, T)
-"""	
-=======
 	#if(show):
 		# plt.plot(x, ya, label='gain du joueur')
 		# plt.plot(x, yb, label='gain maximal espéré')
@@ -194,12 +147,13 @@ def experience(T, quantite):
 	#yc correspond au regret, yb au max et ya au total
 	return yc,yb,ya
 
-taille = 10000
+taille = 100
+nbM = 200
 
-alea_yc, alea_yb, alea_ya = run(genere(200), choisirAlea, taille)
-greedy_yc, greedy_yb, greedy_ya = run(genere(200), choisirGreedy, taille, taille*0.4)
-egreedy_yc, egreedy_yb, egreedy_ya = run(genere(200), choisirEGreedy, taille, 0.2)
-ucb_yc, ucb_yb, ucb_ya = run(genere(200), choisirUCB, taille, 0)
+alea_yc, alea_yb, alea_ya = run(genere(nbM), choisirAlea, taille)
+greedy_yc, greedy_yb, greedy_ya = run(genere(nbM), choisirGreedy, taille, taille*0.4)
+egreedy_yc, egreedy_yb, egreedy_ya = run(genere(nbM), choisirEGreedy, taille, 0.2)
+ucb_yc, ucb_yb, ucb_ya = run(genere(nbM), choisirUCB, taille, 0)
 
 
 #boucle pour récupérer le x du run
@@ -220,4 +174,3 @@ plt.ylabel('regret')
 plt.title('Evolution du regret en fonction du nombre de tirage')
 plt.legend()
 plt.show()
->>>>>>> 631e10949ac701f959f7ace64aa582fa17e6e710
