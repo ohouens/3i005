@@ -34,30 +34,45 @@ class AgentMontecarlo(Agent):
 			esperance.append(0)
 			coups.append(0)
 
-		for i in range(self.n):
+		for i in range(len(actions)):
+			courant = state.courant
 			print('partie '+str(i)+' aleatoire')
-			newState = copy.deepcopy(state)
-			courant = newState.courant
+			print('courant: '+str(courant))
+			coups[i] += 1
+			case = state.get_actions()[i]
+			newState = state.next(case)
+			v1, v2 = jeux(newState, j1, j2, 1, False)
+			if(courant == 1):
+				moyennes[i] += v1
+			else:
+				moyennes[i] += v2
+
+		for i in range(self.n):
+			courant = state.courant
+			print('partie '+str(i)+' aleatoire')
 			print('courant: '+str(courant))
 			choix = random.randint(0,len(actions)-1)
 			coups[choix] += 1
-			print("actions: "+str(len(actions)))
-			print('choix: '+str(choix))
-			case = newState.get_actions()[choix]
-			newState = newState.next(case)
+			case = state.get_actions()[choix]
+			newState = state.next(case)
 			v1, v2 = jeux(newState, j1, j2, 1, False)
 			if(courant == 1):
 				moyennes[choix] += v1
 			else:
 				moyennes[choix] += v2
 
-		for i in range(len(coups)):
-			if[coups[i]==0]:
-				esperance[i] = 0
+		for i in range(len(actions)):
+			if(coups[i]==0):
+				print("probleme")
+				print(coups)
+				print(i)
+				print(coups[i])
+				exit(0)
 			else:
 				esperance[i] = moyennes[i]/coups[i]
-
-		return (actions[esperance.index(max(esperance))])
+		#print(esperance)
+		#exit(0)
+		return actions[esperance.index(max(esperance))]
 
 
 class AgentUCT(Agent):
@@ -212,4 +227,4 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 
 
 
-jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan", 20), 100, True, 1)
+jeux(MorpionState(), AgentAlea("Pierre"), AgentMontecarlo("Ryan", 20), 100, True, 1)
