@@ -10,7 +10,7 @@ nom = ["aleatoire"]
 l=[0.1,0.2,0.3]
 proba_fixe=[0.2, 0.5, 0.012, 0.4]
 gain_fixe=[4, 1, 50, 5]
-"""test"""
+
 def jouer(machine, levier):
 	if(random.random() < machine[levier]):
 		return 1
@@ -54,7 +54,7 @@ def choixGagnant(moyenne):
 
 def calculUCB(moyenne, coups, t):
 	if(coups == 0 or moyenne == 0):
-		return 1
+		return 0.9
 	return moyenne+math.sqrt((2*math.log(t))/coups)
 
 def choixGagnantUCB(moyenne, coups, T):
@@ -68,10 +68,7 @@ def choixGagnantUCB(moyenne, coups, T):
 
 def choisirUCB(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data
-	Na = np.asarray(coups)
-	mu = np.asarray(moyenne)
-	t = Na.sum()
-	return np.argmax(mu + np.sqrt(2*np.log(t)/Na))
+	return choixGagnantUCB(moyenne, coups, t)
 
 def choisirAlea(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data 
@@ -97,10 +94,6 @@ def choisirEGreedy(data, explo=20):
 		
 	else:
 		return choixGagnant(moyenne)
-#ancien ucb
-# def choisirUCB(data, explo=20):
-# 	choix, moyenne, esperance, coups, gagnant, t = data
-# 	return choixGagnantUCB(moyenne, coups, t)
 
 
 
@@ -165,9 +158,7 @@ def run(generation, algorithme, T, explo=20, show=True):
 	#yc correspond au regret, yb au max et ya au total
 	return yc,yb,ya
 
-#print(jouer(l,2))
-#print(uniformatisation(l))
-taille = 1000
+taille = 10000
 
 alea_yc, alea_yb, alea_ya = run(genere(200), choisirAlea, taille)
 greedy_yc, greedy_yb, greedy_ya = run(genere(200), choisirGreedy, taille, taille*0.4)
@@ -190,16 +181,6 @@ plt.plot(x, ucb_yc, label='regret ucb')
 
 plt.xlabel('Times(moves)')
 plt.ylabel('regret')
-plt.title('Bandit-manchots')
+plt.title('Evolution du regret en fonction du nombre de tirage')
 plt.legend()
 plt.show()
-
-
-
-
-def experience(epsilon, T, quantite):
-	regret_alea
-	for i in range(25):
-		pass
-
-
