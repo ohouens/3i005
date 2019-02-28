@@ -180,9 +180,10 @@ class AgentUCT(Agent):
 
 
 
-def graphique(x, y1, y2):
+def graphique(x, y1, y2, y3):
 	plt.plot(x, y1, label='j1')
 	plt.plot(x, y2, label='j2')
+	plt.plot(x, y3, Label='Match nul')
 	plt.xlabel('Times(moves)')
 	plt.ylabel('parties gagnees')
 	plt.title('Morpions')
@@ -195,11 +196,11 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 		pause = 1
 	somme1 = 0
 	somme2 = 0
-
+	somme3 = 0
 	x = []
 	partiesJ1 = []
 	partiesJ2 = []
-
+	partiesJ3 = []
 	for i in range(T):
 		if(show):
 			print("-------------JEU "+str(i)+"-------------")
@@ -210,13 +211,14 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 		elif(win == -1):
 			somme2 += 1
 		else:
-			somme1 += 0.5
-			somme2 += 0.5
+			somme3 += 1
+			
 		x.append(i)
 		partiesJ1.append(somme1)
 		partiesJ2.append(somme2)
+		partiesJ3.append(somme3)
 		if(show and (i+1)%(T//pause) == 0):
-			graphique(x, partiesJ1, partiesJ2)
+			graphique(x, partiesJ1, partiesJ2, partiesJ3)
 	p1 = somme1*100/T
 	p2 = somme2*100/T
 	if(show):
