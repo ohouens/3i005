@@ -81,7 +81,6 @@ class AgentUCT(Agent):
 		self.n = n
 		self.parent = parent
 		self.enfant = []
-		self.retro = False
 		self.coups = 0
 		self.victoire = 0
 		self.courant = 1
@@ -94,7 +93,6 @@ class AgentUCT(Agent):
 		self.naissance()
 		for i in range(self.n):
 			current = self.expansion(self.selection())
-			current.retroPropage()
 		case = self.selection(False)
 		print("SELECTION: "+str(case.prenom)+", son parent: "+str(case.parent.prenom))
 		print(state.get_actions())
@@ -105,23 +103,23 @@ class AgentUCT(Agent):
 				self.coups = 0
 				self.enfant.clear()
 				return state.get_actions()[i]
-		print("ERRRRRRRRRROOOOR: no children found")
+		print("ERRRRRRRRRROOOOR: no child found")
 		exit(0)
 
 	def expansion(self, agent):
 		if(len(agent.enfant) == 0):
 			agent.naissance()
-		agentInter = agent.selection()
-		agentInter.simule()
-		return agentInter
+		else:
+			agentInter = agent.selection()
+			agentInter.simule()
+			agentInter.retroPropage()
+		return agent.selection()
 
 	def retroPropage(self):
 		agent = self
 		while(agent.parent != -1):
-			if(not self.retro):
-				agent.parent.victoire += agent.victoire
-				agent.parent.coups += agent.coups
-				agent.retro = True
+			agent.parent.victoire += agent.victoire
+			agent.parent.coups += agent.coups
 			agent = agent.parent
 		return (agent.victoire, agent.coups)
 
@@ -167,9 +165,9 @@ class AgentUCT(Agent):
 		return agent
 
 	def calculUCB(self, victoire, coups, t):
-		if(coups == 0):
-			return 0
-		return victoire+math.sqrt((2*math.log(t))/coups)
+		if(coups == 0 or victoire == 0):
+			return 0.9
+		return (victoire/coups)+math.sqrt((2*math.log(t))/coups)
 
 	def selectionUCB(self, victoire, coups, T):
 		m = self.calculUCB(victoire[0], coups[0], T)
@@ -227,4 +225,4 @@ def jeux(state, j1, j2, T=500, show=True, pause=4):
 
 
 
-jeux(MorpionState(), AgentAlea("Pierre"), AgentMontecarlo("Ryan", 20), 100, True, 1)
+jeux(MorpionState(), AgentAlea("Pierre"), AgentUCT("Ryan", 100), 100, True, 1)
