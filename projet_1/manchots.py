@@ -66,6 +66,13 @@ def choixGagnantUCB(moyenne, coups, T):
 			m = calculUCB(moyenne[i], coups[i], T)
 	return indice
 
+def choisirUCB(data, explo=20):
+	choix, moyenne, esperance, coups, gagnant, t = data
+	Na = np.asarray(coups)
+	mu = np.asarray(moyenne)
+	t = Na.sum()
+	return np.argmax(mu + np.sqrt(2*np.log(t)/Na))
+
 def choisirAlea(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data 
 	temoin = random.randint(0,100)
@@ -90,10 +97,12 @@ def choisirEGreedy(data, explo=20):
 		
 	else:
 		return choixGagnant(moyenne)
+#ancien ucb
+# def choisirUCB(data, explo=20):
+# 	choix, moyenne, esperance, coups, gagnant, t = data
+# 	return choixGagnantUCB(moyenne, coups, t)
 
-def choisirUCB(data, explo=20):
-	choix, moyenne, esperance, coups, gagnant, t = data
-	return choixGagnantUCB(moyenne, coups, t)
+
 
 def run(generation, algorithme, T, explo=20, show=True):
 	print("-------Initialisation-------")
@@ -107,6 +116,7 @@ def run(generation, algorithme, T, explo=20, show=True):
 	ya = []
 	yb = []
 	x = []
+	yc = []
 	print("\n\n\n-------TRAITEMENT-------")
 	for i in range(T):
 		#tableau de choix pour choisir uniformement les levier
@@ -119,36 +129,112 @@ def run(generation, algorithme, T, explo=20, show=True):
 		moyenne[levier] = recolte[levier]/coups[levier]
 		esperance[levier] = recolte[levier]*1.0/gain[levier]/coups[levier]
 		total += resultat*gain[levier]
-		maximal += gain[levier]
+		meilleur_levier = moyenne.index(max(moyenne))
+		maximal += gain[meilleur_levier]
+		regret = maximal - total
 		ya.append(total)
 		yb.append(maximal)
 		x.append(i)
+		yc.append(regret)
 		if(i == explo):
 			gagnant = choixGagnant(moyenne)
-		regret = maximal - total
+		
 	print("\n\n\n-------TERMINAISON-------")
 	# print("esperance: "+str(esperance))
 	# print("moyenne: "+str(moyenne))
 	# print("gains total: "+str(total))
 	print("regret: "+str(regret))
-	if(show):
-		plt.plot(x, ya, label='gain du joueur')
-		plt.plot(x, yb, label='gain maximal espéré')
-		plt.xlabel('Times(moves)')
-		plt.ylabel('gains(€)')
-		plt.title('Bandit-manchots ('+str(algorithme)+')')
-		plt.legend()
-		plt.show()
-	return regret
+	#if(show):
+		# plt.plot(x, ya, label='gain du joueur')
+		# plt.plot(x, yb, label='gain maximal espéré')
+		# plt.xlabel('Times(moves)')
+		# plt.ylabel('gains(€)')
+		# plt.title('Bandit-manchots ('+str(algorithme)+')')
+		# plt.legend()
+		# plt.show()
+
+		# plt.plot(x, yc, label='regret du joueur')
+		# plt.plot(x, yb, label='gain maximal espéré')
+		# plt.xlabel('Times(moves)')
+		# plt.ylabel('regret')
+		# plt.title('Bandit-manchots ('+str(algorithme)+')')
+		# plt.legend()
+		# plt.show()
+
+	return yc,yb,ya
 
 #print(jouer(l,2))
 #print(uniformatisation(l))
-run(genere(200), choisirAlea, 1000)
-run(genere(200), choisirGreedy, 1000, 500)
-run(genere(200), choisirEGreedy, 1000, 0.1)
-run(genere(200), choisirUCB, 1000, 500)
+taille = 1000
+alea_yc, alea_yb, alea_ya = run(genere(200), choisirAlea, taille)
+greedy_yc, greedy_yb, greedy_ya = run(genere(200), choisirGreedy, taille, taille*0.4)
+egreedy_yc, egreedy_yb, egreedy_ya = run(genere(200), choisirEGreedy, taille, 0.2)
+ucb_yc, ucb_yb, ucb_ya = run(genere(200), choisirUCB, taille, 0)
+x=[]
+for i in range(taille):
+	x.append(i)
+
+plt.plot(x, alea_yc, label='regret alea')
+plt.plot(x, greedy_yc, label='regret greedy')
+plt.plot(x, egreedy_yc, label='regret egreedy')
+plt.plot(x, ucb_yc, label='regret ucb')
+
+plt.xlabel('Times(moves)')
+plt.ylabel('regret')
+plt.title('Bandit-manchots')
+plt.legend()
+plt.show()
+
+
+
 
 def experience(epsilon, T, quantite):
 	regret_alea
 	for i in range(25):
 		pass
+
+
+
+
+#############################################################################
+
+#############################################################################
+
+
+
+def gain_opt(machine, T):
+     """
+     Calcule le gain maximal a toutes les instances entre 0 e T.
+     Retourne un tableau de ces gains.
+     """
+     res = (np.arange(T)+1)
+     return res * np.amax(machine)
+
+def regret(machine, T, res_temps):
+    """
+    Calcule l'evolution du regret par rapport au temps.
+    Renvoie un tableau des regrets pour chaque t entre 0 et T.   
+    """
+
+    opt = gain_opt(machine, T)
+    return opt - res_temps
+
+def graphe_regrets(rgt_alea, rgt_glou, rgt_glou_e, rgt_ucb):
+    """
+    Cree un graphe d'evolution des regrets des 4 algorithmes.
+    Les regrets doivent etre calcules auparavant.
+    """
+    T = np.arange(rgt_alea.size)
+    fig, ax = plt.subplots()
+    ax.grid(True)
+    plt.xlabel("T")
+    plt.ylabel("Regret")
+   
+    ax.plot(T, rgt_alea, label = 'aléatoire') 
+    ax.plot(T, rgt_glou, label = 'glouton')
+    ax.plot(T, rgt_glou_e, label = 'e-glouton')
+    ax.plot(T, rgt_ucb, label = 'UCB')
+    ax.legend(loc = "upper left")
+    plt.title("Regrets des 4 algorithmes par rapport à T")
+    plt.show()
+    
