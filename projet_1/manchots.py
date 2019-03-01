@@ -5,11 +5,9 @@ import matplotlib.patches as patches
 import random
 import math
 
-
-nom = ["aleatoire"]
-l=[0.1,0.2,0.3]
-proba_fixe=[0.2, 0.5, 0.012, 0.4]
-gain_fixe=[4, 1, 50, 5]
+proba_fixe=[]
+for i in range(1000):
+	proba_fixe.append(random.random())
 
 def jouer(machine, levier):
 	if(random.random() < machine[levier]):
@@ -25,10 +23,8 @@ def genere(nombre):
 	coups = []
 	recolte = []
 	for i in range(nombre):
-		#machine.append(proba_fixe[i])
-		#gain.append(gain_fixe[i])
-		machine.append(random.random())
-		#gain.append(random.randint(1,500))
+		machine.append(proba_fixe[i])
+		#machine.append(random.random())
 		gain.append(1)
 		esperance.append(0)
 		moyenne.append(0)
@@ -72,13 +68,7 @@ def choisirUCB(data, explo=20):
 
 def choisirAlea(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data 
-	temoin = random.randint(0,100)
-	levier = 0
-	for i in choix:
-		if(temoin < i):
-			return levier
-		levier += 1
-	return levier
+	return random.randint(0, len(choix)-1)
 
 def choisirGreedy(data, explo=20):
 	choix, moyenne, esperance, coups, gagnant, t = data
@@ -87,14 +77,13 @@ def choisirGreedy(data, explo=20):
 	else:
 		return choisirAlea(data)
 
-def choisirEGreedy(data, explo=20):
+def choisirEGreedy(data, explo=20, e=0.2):
 	choix, moyenne, esperance, coups, gagnant, t = data
 	if(random.random() < explo):
 		return choisirAlea(data)
 		
 	else:
 		return choixGagnant(moyenne)
-
 
 
 def run(generation, algorithme, T, explo=20, show=True):
@@ -158,12 +147,13 @@ def run(generation, algorithme, T, explo=20, show=True):
 	#yc correspond au regret, yb au max et ya au total
 	return yc,yb,ya
 
-taille = 10000
+taille = 100
+nbM = 200
 
-alea_yc, alea_yb, alea_ya = run(genere(200), choisirAlea, taille)
-greedy_yc, greedy_yb, greedy_ya = run(genere(200), choisirGreedy, taille, taille*0.4)
-egreedy_yc, egreedy_yb, egreedy_ya = run(genere(200), choisirEGreedy, taille, 0.2)
-ucb_yc, ucb_yb, ucb_ya = run(genere(200), choisirUCB, taille, 0)
+alea_yc, alea_yb, alea_ya = run(genere(nbM), choisirAlea, taille)
+greedy_yc, greedy_yb, greedy_ya = run(genere(nbM), choisirGreedy, taille, taille*0.4)
+egreedy_yc, egreedy_yb, egreedy_ya = run(genere(nbM), choisirEGreedy, taille, 0.2)
+ucb_yc, ucb_yb, ucb_ya = run(genere(nbM), choisirUCB, taille, 0)
 
 
 #boucle pour récupérer le x du run
