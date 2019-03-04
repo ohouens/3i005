@@ -37,8 +37,39 @@ class APrioriClassifier(utils.AbstractClassifier):
 					vn += 1
 				else:
 					fp += 1
+		result['precision'] = vp*1.0/(vp+fp)
 		result['vp'] = vp
 		result['vn'] = vn
 		result['fp'] = fp
 		result['fn'] = fn
+		result['rappel'] = 1.0
 		return result
+
+def P2D_l(df, attr):
+	result = {}
+	result[0] = {}
+	result[1] = {}
+	malade = 0
+	sain = 0
+	for t in df.itertuples():
+
+		dic = t._asdict()
+		if dic['target'] == 1:
+			malade += 1
+			if dic[attr] in result[1].keys():
+				result[1][dic[attr]] += 1
+			else:
+				result[1][dic[attr]] = 1
+		else :
+			sain += 1
+			if dic[attr] in result[0].keys():
+				result[0][dic[attr]] += 1
+			else:
+				result[0][dic[attr]] = 1
+
+	for i in result[0].keys():
+		result[0][i] = result[0][i]*1.0/sain
+	for i in result[1].keys():
+		result[1][i] = result[1][i]*1.0/malade
+	
+	return result
