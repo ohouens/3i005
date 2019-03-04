@@ -73,3 +73,24 @@ def P2D_l(df, attr):
 		result[1][i] = result[1][i]*1.0/malade
 	
 	return result
+
+def P2D_p(df, attr):
+	result = {}
+	for t in df.itertuples():
+		dic = t._asdict()
+		if(dic[attr] not in result.keys()):
+			result[dic[attr]] = {}
+			result[dic[attr]][0] = 0
+			result[dic[attr]][1] = 0
+			result[dic[attr]]['cpt'] = 0
+		result[dic[attr]]['cpt'] += 1
+		if(dic['target'] == 1):
+			result[dic[attr]][1] += 1
+		else:
+			result[dic[attr]][0] += 1
+
+	for i in result.keys():
+		result[i][0] = result[i][0]*1.0/result[i]['cpt']
+		result[i][1] = result[i][1]*1.0/result[i]['cpt']
+		result[i].pop('cpt', None)
+	return result
