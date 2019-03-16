@@ -1,5 +1,17 @@
 import math
 import utils
+
+def conversion(entier, L=[0,0,0,0]):
+	
+	i = 3
+	while i >= 0 :
+		L[i] = entier//(1024**i)
+		entier = entier%(1024**i)
+		i -= 1
+	return L
+
+
+
 def getPrior(train, confidence=0.95):
 	result = {}
 	mean = train['target'].mean()
@@ -123,16 +135,22 @@ class MAP2DClassifier(APrioriClassifier):
 
 def nbParams(df, attrs=None):
 	result = 1
+	units = ["o","Ko","Mo","Go"]
 	if(attrs == None):
 		attrs = utils.getNthDict(df,0).keys()
 	for i in attrs:
 		result *= len(P2D_p(df, i))
 	result *= 8
 	string = str(len(attrs))+" variable(s) : " + str(result) + " octets"
-	if(result > 1024):
-		quotient = result//1024
-		reste = result%1024
-		string = string + " = "+str(quotient)+"ko "+str(reste)+"o"
+	if result >= 1024:
+		string += " ="
+		conver = conversion(result)
+		i = len(conver) - 1
+		while i >= 0:
+			while i > 0 and conver[i] == 0:
+				i -= 1
+			string = string +" "+str(conver[i])+units[i]
+			i -= 1
 	print(string)
 
 
