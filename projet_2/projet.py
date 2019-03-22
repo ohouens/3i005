@@ -168,3 +168,52 @@ def nbParamsIndep(df, attrs=None):
 		string = string + " = "+str(quotient)+"ko "+str(reste)+"o"
 	print(string)
 
+def drawNaiveBayes(df, attr):
+	result = ""
+	for i in utils.getNthDict(df,0).keys():
+		if(i != attr):
+			result += attr+"->"+i+";"
+	return utils.drawGraph(result)
+
+def nbParamsNaiveBayes(df, attribut, liste_attributs=None):
+	valAttr = len(P2D_p(df, attribut))
+	result = 0
+	units = ["o","Ko","Mo","Go"]
+	if(liste_attributs == None):
+		liste_attributs = utils.getNthDict(df,0).keys()
+	for i in liste_attributs:
+		if i == attribut:
+			result += 1
+		else:
+			result += len(P2D_p(df, i))
+	if(result != 0):
+		result *= 8*valAttr
+	else:
+		result = 8*valAttr
+	string = str(len(liste_attributs))+" variable(s) : " + str(result) + " octets"
+	if result >= 1024:
+		string += " ="
+		conver = conversion(result)
+		i = len(conver) - 1
+		while i >= 0:
+			while i > 0 and conver[i] == 0:
+				i -= 1
+			string = string +" "+str(conver[i])+units[i]
+			i -= 1
+	print(string)
+
+class MAPNaiveBayesClassifier(APrioriClassifier):
+	def __init__(self, df, attr):
+		print("classeur ML2D initialise")
+		self.df = df
+		self.attr = attr
+		self.inter = P2D_l(self.df, self.attr)
+
+	def estimClass(self, personne):
+		if(self.inter[0][personne['thal']] >= self.inter[1][personne['thal']]):
+			return 0
+		else:
+			return 1
+
+	def estimProbas():
+		pass
