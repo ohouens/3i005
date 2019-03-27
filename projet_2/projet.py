@@ -202,18 +202,66 @@ def nbParamsNaiveBayes(df, attribut, liste_attributs=None):
 			i -= 1
 	print(string)
 
-class MAPNaiveBayesClassifier(APrioriClassifier):
-	def __init__(self, df, attr):
-		print("classeur ML2D initialise")
+
+
+
+class MLNaiveBayesClassifier(APrioriClassifier):
+	def __init__(self, df):
 		self.df = df
-		self.attr = attr
-		self.inter = P2D_l(self.df, self.attr)
+		self.liste_attributs = utils.getNthDict(df,0).keys()
+		self.proba = {}
+		for i in self.liste_attributs:
+			self.proba[i] = P2D_l(self.df, i)
+
 
 	def estimClass(self, personne):
-		if(self.inter[0][personne['thal']] >= self.inter[1][personne['thal']]):
-			return 0
-		else:
+		sain, malade = self.estimProbas(personne)
+		if malade > sain:
 			return 1
+		else:
+			return 0
 
-	def estimProbas():
-		pass
+
+	def estimProbas(self,dictionnaire):
+		proba_sain   = 1
+		proba_malade = 1
+		for attribut in self.proba:
+			inter = self.proba[attribut]
+			if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
+
+				proba_sain *= inter[0][dictionnaire[attribut]]
+				proba_malade *= inter[1][dictionnaire[attribut]]
+ 
+		return (proba_sain, proba_malade)
+
+
+# class MAPNaiveBayesClassifier(APrioriClassifier):
+# 	def __init__(self, df):
+# 		self.df = df
+# 		self.liste_attributs = utils.getNthDict(df,0).keys()
+# 		self.proba = {}
+# 		for i in self.liste_attributs:
+# 			self.proba[i] = P2D_l(self.df, i)
+
+
+# 	def estimClass(self, personne):
+# 		sain, malade = self.estimProbas(personne)
+# 		if malade > sain:
+# 			return 1
+# 		else:
+# 			return 0
+
+
+# 	def estimProbas(self,dictionnaire):
+# 		proba_sain   = 1
+# 		proba_malade = 1
+# 		for attribut in self.proba:
+# 			inter = self.proba[attribut]
+# 			if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
+
+# 				proba_sain *= inter[0][dictionnaire[attribut]]
+# 				proba_malade *= inter[1][dictionnaire[attribut]]
+ 
+# 		return (proba_sain, proba_malade)
+
+
