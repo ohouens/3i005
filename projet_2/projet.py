@@ -1,5 +1,10 @@
 import math
 import utils
+import numpy as np 
+import pandas as pd
+import pydotplus
+import matplotlib
+import scipy.stats
 
 def conversion(entier, L=[0,0,0,0]):
 	
@@ -9,6 +14,8 @@ def conversion(entier, L=[0,0,0,0]):
 		entier = entier%(1024**i)
 		i -= 1
 	return L
+
+
 
 
 
@@ -263,3 +270,45 @@ class MAPNaiveBayesClassifier(APrioriClassifier):
 				proba_malade *= inter[1][dictionnaire[attribut]]
 
 		return (proba_sain/(proba_sain+proba_malade), proba_malade/(proba_sain+proba_malade))
+
+
+
+# def isIndepFromTarget(df,attr,x):
+# 	"""
+# 	Vérifie si attr est indépendant de target au seuil de x%.
+	
+# 	:param df: dataframe. Doit contenir une colonne appelée "target" ne contenant que 0 ou 1.
+# 	:param attr: le nom d'une colonne du dataframe df.
+# 	:param x: seuil de confiance.
+# 	"""
+# 	list_val = np.unique(df[attr].values) # Valeurs possibles de l'attribut.
+# 	dico_val = {list_val[i]: i for i in range(list_val.size)} 
+# 	#un dictionnaire associant chaque valeur a leur indice en list_val.
+# 	mat_cont = np.zeros((2, list_val.size), dtype = int)
+	
+# 	for i, row in df.iterrows():
+# 		j =  row[attr]
+# 		mat_cont[row["target"], dico_val[j]]+= 1 
+
+
+# 	print(mat_cont)
+# 	a, b, c, d = scipy.stats.chi2_contingency(mat_cont)
+# 	return b > x
+
+def isIndepFromTarget(df, attribut, seuil):
+	""" Matrice va stocker la matrice de contingence.
+		Pour la construire on a besoin des différentes valeurs 
+		de l'attribut passé en paramètre."""
+	valeurs = np.unique(df[attribut].values)
+	matrice = np.zeros((2, len(valeurs)),dtype=int)
+
+	for index, row in df.iterrows():
+		matrice[row["target"], np.where(valeurs==row[attribut])] += 1
+
+	""""""
+	chi2, p, dof, ex = scipy.stats.chi2_contingency(matrice)
+	return p > seuil
+
+	
+
+
