@@ -235,33 +235,31 @@ class MLNaiveBayesClassifier(APrioriClassifier):
 		return (proba_sain, proba_malade)
 
 
-# class MAPNaiveBayesClassifier(APrioriClassifier):
-# 	def __init__(self, df):
-# 		self.df = df
-# 		self.liste_attributs = utils.getNthDict(df,0).keys()
-# 		self.proba = {}
-# 		for i in self.liste_attributs:
-# 			self.proba[i] = P2D_l(self.df, i)
+class MAPNaiveBayesClassifier(APrioriClassifier):
+	def __init__(self, df):
+		self.df = df
+		self.liste_attributs = utils.getNthDict(df,0).keys()
+		self.proba = {}
+		for i in self.liste_attributs:
+			self.proba[i] = P2D_l(self.df, i)
 
 
-# 	def estimClass(self, personne):
-# 		sain, malade = self.estimProbas(personne)
-# 		if malade > sain:
-# 			return 1
-# 		else:
-# 			return 0
+	def estimClass(self, personne):
+		sain, malade = self.estimProbas(personne)
+		if malade > sain:
+			return 1
+		else:
+			return 0
 
 
-# 	def estimProbas(self,dictionnaire):
-# 		proba_sain   = 1
-# 		proba_malade = 1
-# 		for attribut in self.proba:
-# 			inter = self.proba[attribut]
-# 			if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
+	def estimProbas(self,dictionnaire):
+		proba_sain   = self.df["target"].mean()
+		proba_malade = 1-self.df["target"].mean()
+		for attribut in self.proba:
+			inter = self.proba[attribut]
+			if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
 
-# 				proba_sain *= inter[0][dictionnaire[attribut]]
-# 				proba_malade *= inter[1][dictionnaire[attribut]]
- 
-# 		return (proba_sain, proba_malade)
+				proba_sain *= inter[0][dictionnaire[attribut]]
+				proba_malade *= inter[1][dictionnaire[attribut]]
 
-
+		return (proba_sain/(proba_sain+proba_malade), proba_malade/(proba_sain+proba_malade))
