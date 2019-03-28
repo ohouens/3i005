@@ -1,12 +1,13 @@
 import math
 import utils
-import numpy as np 
+import numpy as np
 import pandas as pd
 import pydotplus
 import matplotlib
+import matplotlib.pyplot as plt
 import scipy.stats
 def conversion(entier, L=[0,0,0,0]):
-	
+
 	i = 3
 	while i >= 0 :
 		L[i] = entier//(1024**i)
@@ -89,7 +90,7 @@ def P2D_l(df, attr):
 		result[0][i] = result[0][i]*1.0/sain
 	for i in result[1].keys():
 		result[1][i] = result[1][i]*1.0/malade
-	
+
 	return result
 
 def P2D_p(df, attr):
@@ -119,7 +120,7 @@ class ML2DClassifier(APrioriClassifier):
 		self.df = df
 		self.attr = attr
 		self.inter = P2D_l(self.df, self.attr)
-	
+
 	def estimClass(self, personne):
 		if(self.inter[0][personne[self.attr]] >= self.inter[1][personne[self.attr]]):
 			return 0
@@ -132,7 +133,7 @@ class MAP2DClassifier(APrioriClassifier):
 		self.df = df
 		self.attr = attr
 		self.inter = P2D_p(self.df, self.attr)
-	
+
 	def estimClass(self, personne):
 		if(self.inter[personne[self.attr]][0] >= self.inter[personne[self.attr]][1]):
 			return 0
@@ -237,7 +238,7 @@ class MLNaiveBayesClassifier(APrioriClassifier):
 
 				proba_sain *= inter[0][dictionnaire[attribut]]
 				proba_malade *= inter[1][dictionnaire[attribut]]
- 
+
 		return (proba_sain, proba_malade)
 
 
@@ -272,7 +273,7 @@ class MAPNaiveBayesClassifier(APrioriClassifier):
 
 def isIndepFromTarget(df, attribut, seuil):
 	""" Matrice va stocker la matrice de contingence.
-		Pour la construire on a besoin des différentes valeurs 
+		Pour la construire on a besoin des différentes valeurs
 		de l'attribut passé en paramètre."""
 	valeurs = np.unique(df[attribut].values)
 	matrice = np.zeros((2, len(valeurs)),dtype=int)
@@ -283,7 +284,7 @@ def isIndepFromTarget(df, attribut, seuil):
 	chi2, p, dof, ex = scipy.stats.chi2_contingency(matrice)
 	return p > seuil
 
-	
+
 
 
 class ReducedMLNaiveBayesClassifier(APrioriClassifier):
@@ -313,7 +314,7 @@ class ReducedMLNaiveBayesClassifier(APrioriClassifier):
 
 				proba_sain *= inter[0][dictionnaire[attribut]]
 				proba_malade *= inter[1][dictionnaire[attribut]]
- 
+
 		return (proba_sain, proba_malade)
 
 	def draw(self):
@@ -363,3 +364,15 @@ class ReducedMAPNaiveBayesClassifier(APrioriClassifier):
 				result += "target"+"->"+i+";"
 		return utils.drawGraph(result)
 
+def mapClassifiers(dic, df):
+	precision = []
+	rappel = []
+	nom = []
+	for k, v in dic.items():
+		inter = v.statsOnDF(df)
+		nom.append(k)
+		precision.append(inter['precision'])
+		rappel.append(inter['rappel'])
+	plt.scatter(precision, rappel, color="r", marker="x")
+	for i, txt in enumerate(nom):
+		plt.annotate(txt, (precision[i], rappel[i]))
