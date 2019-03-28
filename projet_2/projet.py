@@ -5,7 +5,6 @@ import pandas as pd
 import pydotplus
 import matplotlib
 import scipy.stats
-
 def conversion(entier, L=[0,0,0,0]):
 	
 	i = 3
@@ -122,7 +121,7 @@ class ML2DClassifier(APrioriClassifier):
 		self.inter = P2D_l(self.df, self.attr)
 	
 	def estimClass(self, personne):
-		if(self.inter[0][personne['thal']] >= self.inter[1][personne['thal']]):
+		if(self.inter[0][personne[self.attr]] >= self.inter[1][personne[self.attr]]):
 			return 0
 		else:
 			return 1
@@ -135,7 +134,7 @@ class MAP2DClassifier(APrioriClassifier):
 		self.inter = P2D_p(self.df, self.attr)
 	
 	def estimClass(self, personne):
-		if(self.inter[personne['thal']][0] >= self.inter[personne['thal']][1]):
+		if(self.inter[personne[self.attr]][0] >= self.inter[personne[self.attr]][1]):
 			return 0
 		else:
 			return 1
