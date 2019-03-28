@@ -287,3 +287,80 @@ def isIndepFromTarget(df, attribut, seuil):
 	
 
 
+class ReducedMLNaiveBayesClassifier(APrioriClassifier):
+	def __init__(self, df, seuil):
+		self.df = df
+		self.liste_attributs = utils.getNthDict(df,0).keys()
+		self.proba = {}
+		for attribut in self.liste_attributs:
+			if not isIndepFromTarget(df, attribut, seuil):
+				self.proba[attribut] = P2D_l(self.df, attribut)
+
+
+	def estimClass(self, personne):
+		sain, malade = self.estimProbas(personne)
+		if malade > sain:
+			return 1
+		else:
+			return 0
+
+
+	def estimProbas(self,dictionnaire):
+		proba_sain   = 1
+		proba_malade = 1
+		for attribut in self.proba:
+			inter = self.proba[attribut]
+			if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
+
+				proba_sain *= inter[0][dictionnaire[attribut]]
+				proba_malade *= inter[1][dictionnaire[attribut]]
+ 
+		return (proba_sain, proba_malade)
+
+	def draw(self):
+		result = ""
+		for i in self.proba.keys():
+			if(i != 'target'):
+				result += "target"+"->"+i+";"
+		return utils.drawGraph(result)
+
+
+
+class ReducedMAPNaiveBayesClassifier(APrioriClassifier):
+	def __init__(self, df, seuil):
+		self.df = df
+		self.liste_attributs = utils.getNthDict(df,0).keys()
+		self.proba = {}
+		for attribut in self.liste_attributs:
+			if not isIndepFromTarget(df, attribut, seuil):
+				self.proba[attribut] = P2D_l(self.df, attribut)
+
+
+
+	def estimClass(self, personne):
+		sain, malade = self.estimProbas(personne)
+		if malade > sain:
+			return 1
+		else:
+			return 0
+
+
+	def estimProbas(self,dictionnaire):
+		proba_sain   = self.df["target"].mean()
+		proba_malade = 1-self.df["target"].mean()
+		for attribut in self.proba:
+			inter = self.proba[attribut]
+			if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
+
+				proba_sain *= inter[0][dictionnaire[attribut]]
+				proba_malade *= inter[1][dictionnaire[attribut]]
+
+		return (proba_sain/(proba_sain+proba_malade), proba_malade/(proba_sain+proba_malade))
+
+	def draw(self):
+		result = ""
+		for i in self.proba.keys():
+			if(i != 'target'):
+				result += "target"+"->"+i+";"
+		return utils.drawGraph(result)
+
