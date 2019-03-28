@@ -216,8 +216,8 @@ class MLNaiveBayesClassifier(APrioriClassifier):
 		self.df = df
 		self.liste_attributs = utils.getNthDict(df,0).keys()
 		self.proba = {}
-		for i in self.liste_attributs:
-			self.proba[i] = P2D_l(self.df, i)
+		for attribut in self.liste_attributs:
+			self.proba[attribut] = P2D_l(self.df, attribut)
 
 
 	def estimClass(self, personne):
@@ -232,19 +232,21 @@ class MLNaiveBayesClassifier(APrioriClassifier):
 		proba_sain   = 1
 		proba_malade = 1
 		for attribut in self.proba:
-			inter = self.proba[attribut]
-			if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
+			if attribut != 'target':
+				inter = self.proba[attribut]
+				if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
 
-				proba_sain *= inter[0][dictionnaire[attribut]]
-				proba_malade *= inter[1][dictionnaire[attribut]]
- 
+					proba_sain *= inter[0][dictionnaire[attribut]]
+					proba_malade *= inter[1][dictionnaire[attribut]]
+	 
 		return (proba_sain, proba_malade)
 
 
 class MAPNaiveBayesClassifier(APrioriClassifier):
 	def __init__(self, df):
 		self.df = df
-		self.liste_attributs = utils.getNthDict(df,0).keys()
+		self.liste_attributs = list(utils.getNthDict(df,0).keys())
+		self.liste_attributs.remove('target')
 		self.proba = {}
 		for i in self.liste_attributs:
 			self.proba[i] = P2D_l(self.df, i)
@@ -269,6 +271,7 @@ class MAPNaiveBayesClassifier(APrioriClassifier):
 				proba_malade *= inter[1][dictionnaire[attribut]]
 
 		return (proba_sain/(proba_sain+proba_malade), proba_malade/(proba_sain+proba_malade))
+
 
 def isIndepFromTarget(df, attribut, seuil):
 	""" Matrice va stocker la matrice de contingence.
