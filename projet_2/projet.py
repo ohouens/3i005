@@ -8,21 +8,6 @@ import matplotlib.pyplot as plt
 import scipy.stats
 
 
-def conversion(entier, L=[0,0,0,0]):
-	""" conversion prend en entrée un nombre d'octets 
-	et retourne le nombre sous la form  d'une liste 
-	[o, Ko, Mo, Go]
-	ex : conversion(10000000000) -> [0, 761, 320, 9]"""
-	i = 3
-	while i >= 0 :
-		L[i] = entier//(1024**i)
-		entier = entier%(1024**i)
-		i -= 1
-	return L
-
-
-
-
 
 def getPrior(train, confidence=0.95):
 	result = {}
@@ -117,7 +102,7 @@ def P2D_p(df, attr):
 	"""
 	P2D_p(df, attr) calcule dans le dataframe la probabilité P(target|attr)
 	sous la forme d'un dictionnaire associant à la valeur A
-	un dictionnaire asssociant à la valeur T la probabilité P(target=T|attr=A)"""
+	un dictionnaire associant à la valeur T la probabilité P(target=T|attr=A)"""
 	result = {}
 	for t in df.itertuples():
 		dic = t._asdict()
@@ -141,12 +126,18 @@ def P2D_p(df, attr):
 
 class ML2DClassifier(APrioriClassifier):
 	def __init__(self, df, attr):
+		"""self.inter est un dictionnaire P2D_l (dictionnaire associant à la valeur T
+	un dictionnaire associant à la valeur A la probabilité P(attr=A|target=T))"""
 		print("classeur ML2D initialise")
+
 		self.df = df
 		self.attr = attr
 		self.inter = P2D_l(self.df, self.attr)
 
 	def estimClass(self, personne):
+		""" le classifier retourne :
+		0 si P(A|0) > P(A|1)
+		1 sinon"""
 		if(self.inter[0][personne[self.attr]] >= self.inter[1][personne[self.attr]]):
 			return 0
 		else:
@@ -154,18 +145,26 @@ class ML2DClassifier(APrioriClassifier):
 
 class MAP2DClassifier(APrioriClassifier):
 	def __init__(self, df, attr):
+		"""self.inter est un dictionnaire P2D_p (dictionnaire associant à la valeur A
+	un dictionnaire associant à la valeur T la probabilité P(target=T|attr=A))"""
 		print("classeur MAP2D initialise")
 		self.df = df
 		self.attr = attr
 		self.inter = P2D_p(self.df, self.attr)
 
 	def estimClass(self, personne):
+		""" le classifier retourne :
+		0 si P(0|A) > P(1|A)
+		1 sinon"""
 		if(self.inter[personne[self.attr]][0] >= self.inter[personne[self.attr]][1]):
 			return 0
 		else:
 			return 1
 
 def nbParams(df, attrs=None):
+	"""nbParams calcule la taille mémoire des tables $P(target|attr_1,..,attr_k)$
+	étant donné un dataframe et la liste $[target,attr_1,...,attr_l]$
+	 en supposant qu'un float est représenté sur 8octets"""
 	result = 1
 	units = ["o","Ko","Mo","Go"]
 	if(attrs == None):
@@ -186,7 +185,23 @@ def nbParams(df, attrs=None):
 	print(string)
 
 
+def conversion(entier, L=[0,0,0,0]):
+	""" conversion prend en entrée un nombre d'octets 
+	et retourne le nombre sous la form  d'une liste 
+	[o, Ko, Mo, Go]
+	ex : conversion(10000000000) -> [0, 761, 320, 9]"""
+	i = 3
+	while i >= 0 :
+		L[i] = entier//(1024**i)
+		entier = entier%(1024**i)
+		i -= 1
+	return L
+
+
 def nbParamsIndep(df, attrs=None):
+	"""calcule la taille mémoire nécessaire pour représenter les tables de probabilité
+	étant donné un dataframe, en supposant qu'un float est représenté sur 8octets
+	et en supposant l'indépendance des variables """
 	result = 0
 	if(attrs == None):
 		attrs = utils.getNthDict(df,0).keys()
