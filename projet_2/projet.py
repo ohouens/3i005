@@ -6,8 +6,13 @@ import pydotplus
 import matplotlib
 import matplotlib.pyplot as plt
 import scipy.stats
-def conversion(entier, L=[0,0,0,0]):
 
+
+def conversion(entier, L=[0,0,0,0]):
+	""" conversion prend en entrée un nombre d'octets 
+	et retourne le nombre sous la form  d'une liste 
+	[o, Ko, Mo, Go]
+	ex : conversion(10000000000) -> [0, 761, 320, 9]"""
 	i = 3
 	while i >= 0 :
 		L[i] = entier//(1024**i)
@@ -39,52 +44,67 @@ class APrioriClassifier(utils.AbstractClassifier):
 
 	def statsOnDF(self, df):
 		result = {}
-		vp = 0
-		vn = 0
-		fp = 0
-		fn = 0
+		"""
+		VP : nombre d'individus avec target = 1 et classe prévue = 1
+		VN : nombre d'individus avec target = 0 et classe prévue = 0
+		FP : nombre d'individus avec target = 0 et classe prévue = 1
+		FN : nombre d'individus avec target = 1 et classe prévue = 0"""
+		vrai_positif = 0
+		vrai_negatif = 0
+		faux_positif = 0
+		faux_negatif = 0
+		"""calcul des différentes statistiques:
+			témoin représente l'estimation de la classe de la personne et 
+			dic['target'] sa classe réelle """
 		for t in df.itertuples():
 			dic = t._asdict()
 			temoin = self.estimClass(dic)
 			if(temoin == 1):
 				if(temoin == dic['target']):
-					vp += 1
+					vrai_positif += 1
 				else:
-					fp += 1
+					faux_positif += 1
 			else:
 				if(temoin == dic['target']):
-					vn += 1
+					vrai_negatif += 1
 				else:
-					fn += 1
-		result['precision'] = vp*1.0/(vp+fp)
-		result['vp'] = vp
-		result['vn'] = vn
-		result['fp'] = fp
-		result['fn'] = fn
-		result['rappel'] = vp*1.0/(vp+fn)
+					faux_negatif += 1
+		result['precision'] = vrai_positif*1.0/(vrai_positif+faux_positif)
+		result['vp'] = vrai_positif
+		result['vn'] = vrai_negatif		
+		result['fp'] = faux_positif
+		result['fn'] = faux_negatif
+		result['rappel'] = vrai_positif*1.0/(vrai_positif+faux_negatif)
 		return result
 
 def P2D_l(df, attr):
+	"""
+	P2D_l(df, attr) calcule dans le dataframe la probabilité P(attr|target) sous 
+	la forme d'un dictionnaire asssociant à la valeur T
+	un dictionnaire associant à la valeur A la probabilité P(attr=A|target=T)"""
 	result = {}
 	result[0] = {}
 	result[1] = {}
 	malade = 0
 	sain = 0
+
 	for t in df.itertuples():
 
 		dic = t._asdict()
+		A = dic[attr]
 		if dic['target'] == 1:
 			malade += 1
-			if dic[attr] in result[1].keys():
-				result[1][dic[attr]] += 1
+
+			if A in result[1].keys():
+				result[1][A] += 1
 			else:
-				result[1][dic[attr]] = 1
+				result[1][A] = 1
 		else :
 			sain += 1
-			if dic[attr] in result[0].keys():
-				result[0][dic[attr]] += 1
+			if A in result[0].keys():
+				result[0][A] += 1
 			else:
-				result[0][dic[attr]] = 1
+				result[0][A] = 1
 
 	for i in result[0].keys():
 		result[0][i] = result[0][i]*1.0/sain
@@ -94,19 +114,24 @@ def P2D_l(df, attr):
 	return result
 
 def P2D_p(df, attr):
+	"""
+	P2D_p(df, attr) calcule dans le dataframe la probabilité P(target|attr)
+	sous la forme d'un dictionnaire associant à la valeur A
+	un dictionnaire asssociant à la valeur T la probabilité P(target=T|attr=A)"""
 	result = {}
 	for t in df.itertuples():
 		dic = t._asdict()
-		if(dic[attr] not in result.keys()):
-			result[dic[attr]] = {}
-			result[dic[attr]][0] = 0
-			result[dic[attr]][1] = 0
-			result[dic[attr]]['cpt'] = 0
-		result[dic[attr]]['cpt'] += 1
+		A = dic[attr]
+		if(A not in result.keys()):
+			result[A] = {}
+			result[A][0] = 0
+			result[A][1] = 0
+			result[A]['cpt'] = 0
+		result[A]['cpt'] += 1
 		if(dic['target'] == 1):
-			result[dic[attr]][1] += 1
+			result[A][1] += 1
 		else:
-			result[dic[attr]][0] += 1
+			result[A][0] += 1
 
 	for i in result.keys():
 		result[i][0] = result[i][0]*1.0/result[i]['cpt']
@@ -315,7 +340,6 @@ class ReducedMLNaiveBayesClassifier(APrioriClassifier):
 		for attribut in self.proba:
 			inter = self.proba[attribut]
 			if dictionnaire[attribut] in inter[0] and dictionnaire[attribut] in inter[1] :
-
 				proba_sain *= inter[0][dictionnaire[attribut]]
 				proba_malade *= inter[1][dictionnaire[attribut]]
 
