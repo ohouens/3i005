@@ -3,6 +3,8 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
 
 #Définition des nucléotides
 nucleotide = {'A':0,'C':1,'G':2,'T':3}
@@ -106,7 +108,8 @@ def count_word(k, sequence):
     return res
 
 def comptage_attendu(frequences, k, l):
-    #UTILISER LOGPROBA
+    """comptage attendu renvoie le comptage théorique des différents
+     nucléotides dans la séquence"""
     result = {}
     mots = genereMots(k)
     for mot in mots:
@@ -117,18 +120,34 @@ def comptage_attendu(frequences, k, l):
     return result
 
 def graphique(k, sequence):
+
     frequences = nucleotide_frequency(sequence)
-    abscisse = comptage_attendu(frequences, k, len(sequence))
-    ordonnee = count_word(k, sequence)
+    abscisse   = comptage_attendu(frequences, k, len(sequence))
+    ordonnee   = count_word(k, sequence)
     x = []
     y = []
     for cle in ordonnee.keys():
         y.append(ordonnee[cle])
         x.append(abscisse[cle])
+    plt.title( "Comparaison des occurences, k = "+str(k))
     plt.scatter(x, y, edgecolor='black')
+    plt.xlabel("Nombre d'occurences attendues")
+    plt.ylabel("Nombre d'occurences observées")
     plt.show()
 
 def simule_sequence(lg, m):
+    """simule séquence renvoie une séquence de 
+    longueur Lg dont :
+    la proportion en A est de m[0], 
+    la propotrion en C est de m[1],
+    la propotrion en G est de m[2],
+    la propotrion en T est de m[3].
+    On rappelle que 0 représente le nucléotide A,
+    1 le nucléotide C,
+    2 le nucléotide G,
+    3 le nucléotide T,
+     """
+
     seq =[]
     for i in range(lg):
         a = random.random()
@@ -143,6 +162,9 @@ def simule_sequence(lg, m):
     return seq
 
 def compare(k, sequence):
+    """la fonction compare renvoie la valeur absolue 
+    de la différence entre le comptage observé et le comptage attendu.
+    Plus ce nombre est proche de zéro plus les comptages sont similaires."""
     frequences = nucleotide_frequency(sequence)
     abscisse = comptage_attendu(frequences, k, len(sequence))
     ordonnee = count_word(k, sequence)
