@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import random
 from matplotlib.ticker import MaxNLocator
 from collections import namedtuple
-
+import seaborn as sns
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
 
@@ -183,20 +183,25 @@ def compare(k, sequence):
         x.append(abscisse[cle])
     return math.fabs(np.mean([y])-np.mean([x]))
 
-def probaempirique(sequences,mot,n):
+def probaempirique(mot,n,K):
     res = 0
-    for i in sequences.values():
+    sequences = []
+    for i in range(K):
+        sequences.append(simule_sequence(1000,[0.25,0.25,0.25,0.25]))
+    for i in sequences:
         dico = count_word(len(mot), i)
-        if mot in dico.keys() and dico[mot] >= n:
+        if mot in dico.keys() :
             res += 1
-    return res*1.0/len(sequences[0])
-
-def creationhisto(motifs,x,sequences):
+    if res >= n:
+        return res*1.0/len(sequences)
+    else :
+        return 0
+def creationhisto(motifs,x,K):
     proba = {}
     for i in motifs:
         proba[i]=[]
         for j in range(x):
-            proba[i].append(probaempirique(sequences,i,j))
+            proba[i].append(probaempirique(i,j,K))
 
     return proba
 
@@ -244,3 +249,10 @@ def histogramme(proba,motifs,o):
     ax.legend()
 
     plt.show() 
+
+def histogramme2(motifs,N):
+
+    dico = creationhisto(motifs,N,10)
+    x = list(dico.values())
+    print(x)
+    sns.distplot(x)
