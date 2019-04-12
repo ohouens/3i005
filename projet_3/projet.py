@@ -137,8 +137,10 @@ def graphique(k, sequence):
         x.append(abscisse[cle])
     plt.title( "Comparaison des occurences, k = "+str(k))
     plt.scatter(x, y, edgecolor='black')
+    plt.plot([min(min(x),min(y)),max(max(x),max(y))],[min(min(x),min(y)),max(max(x),max(y))], 'r-', lw=2,label="x=y")
     plt.xlabel("Nombre d'occurences attendues")
     plt.ylabel("Nombre d'occurences observées")
+    plt.legend()
     plt.show()
 
 def simule_sequence(lg, m):
@@ -240,5 +242,5 @@ def histogramme(proba,motifs,o):
     ax.set_xticks(index + bar_width / 4)
     ax.set_xticklabels(('1', '2', '3', '4', '5'))
     ax.legend()
-    fig.tight_layout()
+
     plt.show() 
