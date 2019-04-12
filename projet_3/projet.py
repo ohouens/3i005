@@ -99,17 +99,13 @@ def genereMots(k):
     return res
 
 def count_word(k, sequence):
-    res = {}
-
+    res = genereMots(k)
     for i in range(len(sequence)-k+1):
         mot = sequence[i:i+k]
         string = ""
         for s in mot:
             string += nucleotide_inverse[s]
-        if string in res.keys():
-            res[string] += 1
-        else:
-            res[string] = 1
+        res[string] += 1
 
     return res
 
