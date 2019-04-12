@@ -192,6 +192,7 @@ def probaempirique(mot,n,K):
         return res*1.0/len(sequences)
     else :
         return 0
+
 def creationhisto(motifs,x,K):
     proba = {}
     for i in motifs:
@@ -200,7 +201,6 @@ def creationhisto(motifs,x,K):
             proba[i].append(probaempirique(i,j,K))
 
     return proba
-
 
 def histogramme(proba,motifs,o):
     liste=[]
@@ -244,11 +244,4 @@ def histogramme(proba,motifs,o):
     ax.set_xticklabels(('1', '2', '3', '4', '5'))
     ax.legend()
 
-    plt.show() 
-
-def histogramme2(motifs,N):
-
-    dico = creationhisto(motifs,N,10)
-    x = list(dico.values())
-    print(x)
-    sns.distplot(x)
+    plt.show()
