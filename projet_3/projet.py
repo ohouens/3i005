@@ -246,13 +246,11 @@ def histogramme(proba,motifs,o):
 
     plt.show()
 
-    def estimMatrice(sequence):
+def estimMatrice(sequence):
     dico = count_word(2,sequence)
     matrice = np.zeros((4,4),dtype=float)
     print(dico)
     denominateur = 0
-    matrice[0][0] = dico['AA']*1.0/dico['AT']+dico['AG']+dico['AA']+dico['AC']
-    matrice[0][1] = dico['AC']*1.0/dico['AT']+dico['AG']+dico['AA']+dico['AC']
     for i in range(4):
         for j in range(4):
             matrice[i][j] = dico[nucleotide_inverse[i]+nucleotide_inverse[j]]
