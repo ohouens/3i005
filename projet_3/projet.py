@@ -3,6 +3,9 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+from matplotlib.ticker import MaxNLocator
+from collections import namedtuple
+
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
 
@@ -44,6 +47,9 @@ def read_fasta(fasta_filepath):
 
 
     return sequences_dict
+
+def listToString(liste):
+    return "".join(str(j) for j in liste)
 
 def nucleotide_count(sequence):
     count = [0 for k in nucleotide]
@@ -177,9 +183,62 @@ def compare(k, sequence):
 
 def probaempirique(sequences,mot,n):
     res = 0
-
     for i in sequences.values():
         dico = count_word(len(mot), i)
         if mot in dico.keys() and dico[mot] >= n:
             res += 1
-    return res*1.0/len(sequences)
+    return res*1.0/len(sequences[0])
+
+def creationhisto(motifs,x,sequences):
+    proba = {}
+    for i in motifs:
+        proba[i]=[]
+        for j in range(x):
+            proba[i].append(probaempirique(sequences,i,j))
+
+    return proba
+
+
+def histogramme(proba,motifs,o):
+    liste=[]
+   
+    # bins = []
+    # bins=np.arange(4)
+    # color = ['yellow', 'green','brown','blue']
+    for i in range(len(motifs)):
+    #     plt.bar(proba[motifs[i]],bins+i/4.0,color[i])
+        liste.append(proba[motifs[i]])
+    # #plt.hist([liste[0],liste[1],liste[2],liste[3]], bins = bins, color = ['yellow', 'green','brown','blue'],
+    # #   edgecolor = 'red', hatch = '/', label = [motif for motif in motifs]) # bar est le defaut
+    # plt.ylabel('probabilités')
+    # plt.xlabel('occurences minimale par séquence')
+    # plt.title('')
+    # plt.legend()
+    #
+    a = tuple(liste[0])
+    b = tuple(liste[1])
+    c = tuple(liste[2])
+    d = tuple(liste[3])
+
+    fig, ax = plt.subplots()
+
+    index = np.arange(o)
+    bar_width = 0.2
+    opacity = 0.6
+    
+    rects1 = ax.bar(index-bar_width, a, bar_width,
+                    alpha=opacity, color='blue',label=motifs[0])
+    rects2 = ax.bar(index, b, bar_width,
+                    alpha=opacity, color='red',label=motifs[1])
+    rects3 = ax.bar(index +bar_width, c, bar_width,
+                    alpha=opacity, color='yellow',label=motifs[2])
+    rects3 = ax.bar(index + 2*bar_width, d, bar_width,
+                    alpha=opacity, color='green',label=motifs[3])
+    ax.set_xlabel('occurences minimales du motif ')
+    ax.set_ylabel('probabilités')
+    ax.set_title("")
+    ax.set_xticks(index + bar_width / 4)
+    ax.set_xticklabels(('1', '2', '3', '4', '5'))
+    ax.legend()
+    fig.tight_layout()
+    plt.show() 
