@@ -118,7 +118,7 @@ def comptage_attendu(frequences, k, l):
         inter = 1
         for lettre in mot:
             inter *= frequences[nucleotide[lettre]]
-        result[mot] = inter*l
+        result[mot] = inter*(l-k+1)
     return result
 
 def graphique(k, sequence):
@@ -179,86 +179,46 @@ def compare(k, sequence):
         x.append(abscisse[cle])
     return math.fabs(np.mean([y])-np.mean([x]))
 
-def probaempirique(mot,n,K):
-    res = 0
-    sequences = []
-    for i in range(K):
-        sequences.append(simule_sequence(1000,[0.25,0.25,0.25,0.25]))
-    for i in sequences:
-        dico = count_word(len(mot), i)
-        if mot in dico.keys() :
-            res += 1
-    if res >= n:
-        return res*1.0/len(sequences)
-    else :
-        return 0
 
-def creationhisto(motifs,x,K):
-    proba = {}
-    for i in motifs:
-        proba[i]=[]
-        for j in range(x):
-            proba[i].append(probaempirique(i,j,K))
+def probaempirique(mot,  frequences,l=10000, boucles=1000):
+    """Renvoie un dictionnaire dont les clés sont les occurences n,
+    les valeurs sont la probabilité d'avoir le mot n fois"""
+    probas = {}
+    for i in range(boucles):
+        seq = simule_sequence(l, frequences)
+        mots = count_word(len(mot), seq)
+        cpt = mots[mot]
+        if cpt in probas:
+            probas[cpt] += 1
+        else:
+            probas[cpt] = 1
+    return {key : value/boucles for key,value in probas.items()}
 
-    return proba
 
-def histogramme(proba,motifs,o):
-    liste=[]
-   
-    # bins = []
-    # bins=np.arange(4)
-    # color = ['yellow', 'green','brown','blue']
-    for i in range(len(motifs)):
-    #     plt.bar(proba[motifs[i]],bins+i/4.0,color[i])
-        liste.append(proba[motifs[i]])
-    # #plt.hist([liste[0],liste[1],liste[2],liste[3]], bins = bins, color = ['yellow', 'green','brown','blue'],
-    # #   edgecolor = 'red', hatch = '/', label = [motif for motif in motifs]) # bar est le defaut
-    # plt.ylabel('probabilités')
-    # plt.xlabel('occurences minimale par séquence')
-    # plt.title('')
-    # plt.legend()
-    #
-    a = tuple(liste[0])
-    b = tuple(liste[1])
-    c = tuple(liste[2])
-    d = tuple(liste[3])
+def histogramme(mot, frequences):
+    probas = probaempirique(mot,frequences)
+    fig, ax = plt.subplots(figsize=(7,5))
+    ax.bar(probas.keys(), probas.values())
+    ax.set_title("Distribution du comptage de "+mot)
+    ax.set_xlabel("Occurrences")
+    ax.set_ylabel("Probabilités")
 
-    fig, ax = plt.subplots()
-
-    index = np.arange(o)
-    bar_width = 0.2
-    opacity = 0.6
-    
-    rects1 = ax.bar(index-bar_width, a, bar_width,
-                    alpha=opacity, color='blue',label=motifs[0])
-    rects2 = ax.bar(index, b, bar_width,
-                    alpha=opacity, color='red',label=motifs[1])
-    rects3 = ax.bar(index +bar_width, c, bar_width,
-                    alpha=opacity, color='yellow',label=motifs[2])
-    rects3 = ax.bar(index + 2*bar_width, d, bar_width,
-                    alpha=opacity, color='green',label=motifs[3])
-    ax.set_xlabel('occurences minimales du motif ')
-    ax.set_ylabel('probabilités')
-    ax.set_title("")
-    ax.set_xticks(index + bar_width / 4)
-    ax.set_xticklabels(('1', '2', '3', '4', '5'))
-    ax.legend()
-
-    plt.show()
 
 def estimMatrice(sequence):
+    """Renvoie la matrice de transition calculée à partir
+    du comptage de mots de longueur 2"""
     dico = count_word(2,sequence)
     matrice = np.zeros((4,4),dtype=float)
-    print(dico)
-    denominateur = 0
+    
     for i in range(4):
+        denominateur = 0
         for j in range(4):
             matrice[i][j] = dico[nucleotide_inverse[i]+nucleotide_inverse[j]]
             denominateur += dico[nucleotide_inverse[i]+nucleotide_inverse[j]]
         matrice[i,:]= matrice[i,:]*1.0 / denominateur
 
-
     return matrice
+
 
 def simule_markov(lg, matrice, frequences=[0.25,0.25,0.25,0.25]):
     """simule _markov renvoie une séquence de 
@@ -299,14 +259,18 @@ def proba_apparition(mot, M, frequence=[0.25,0.25,0.25,0.25]):
     p = frequence[nucleotide[mot[0]]]
 
     for i in range(1,len(mot)):
-        print(M[nucleotide[mot[i-1]]][nucleotide[mot[i]]])
         p = p*M[nucleotide[mot[i-1]]][nucleotide[mot[i]]]
 
     return p
 
-def nbr_occurences(mot, M, k, lg, frequence=[0.25,0.25,0.25,0.25]):
+def nbr_occurences( M, k, l, frequence=[0.25,0.25,0.25,0.25]):
     """nbr occurences renvoie le nombre supposé
-    d'occurences du mot de taille k, dans une séquence de taille lg à
+    d'occurences des mot de taille k, dans une séquence de taille lg à
     partir du vecteur frequence et de la matrice M"""
+    result = {}
+    mots = genereMots(k)
+    for mot in mots.keys():
+        
+        result[mot] = (l-k+1)*proba_apparition(mot,M,frequence=frequence)
 
-    return k*proba_apparition
+    return result
