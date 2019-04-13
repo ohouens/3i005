@@ -290,3 +290,23 @@ def simule_markov(lg, matrice, frequences=[0.25,0.25,0.25,0.25]):
 
 
     return sequence
+
+
+def proba_apparition(mot, M, frequence=[0.25,0.25,0.25,0.25]):
+    """proba_apparition calcule la probabilité d'apparition 
+    du mot à l'aide du vecteur frequence (pour le 1er nucleotide)
+    et de la matrice M pour les nucléotides suivant"""
+    p = frequence[nucleotide[mot[0]]]
+
+    for i in range(1,len(mot)):
+        print(M[nucleotide[mot[i-1]]][nucleotide[mot[i]]])
+        p = p*M[nucleotide[mot[i-1]]][nucleotide[mot[i]]]
+
+    return p
+
+def nbr_occurences(mot, M, k, lg, frequence=[0.25,0.25,0.25,0.25]):
+    """nbr occurences renvoie le nombre supposé
+    d'occurences du mot de taille k, dans une séquence de taille lg à
+    partir du vecteur frequence et de la matrice M"""
+
+    return k*proba_apparition
