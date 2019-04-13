@@ -259,3 +259,34 @@ def estimMatrice(sequence):
 
 
     return matrice
+
+def simule_markov(lg, matrice, frequences=[0.25,0.25,0.25,0.25]):
+    """simule _markov renvoie une séquence de 
+    longueur Lg dont les proportions en nucléotide
+    suivent le modèle de dinucléotides"""
+    sequence = ""
+    #calcul du premier nucléotide
+    a = random.random()
+    if a < frequences[0]:
+        sequence += str(0)
+    elif a < frequences[0]+frequences[1]:
+        sequence += str(1)
+    elif a < frequences[0]+frequences[1]+frequences[2]:
+        sequence += str(2)
+    else:
+        sequence += str(3)
+    #estimation des lg-1 nucléotides suivant
+    for i in range(1,lg):
+        a = random.random()
+        if a < matrice[int(sequence[i-1])][0]:
+            sequence += str(0)
+        elif a < matrice[int(sequence[i-1])][0]+matrice[int(sequence[i-1])][1]:
+            sequence += str(1)
+        elif a < matrice[int(sequence[i-1])][0]+matrice[int(sequence[i-1])][1]+matrice[int(sequence[i-1])][2]:
+            sequence += str(2)
+        else:
+            sequence += str(3) 
+
+
+
+    return sequence
