@@ -122,7 +122,8 @@ def comptage_attendu(frequences, k, l):
     return result
 
 def graphique(k, sequence):
-
+    """Trace le graphique avec en abscisse le comptage attendu
+    et en ordonnée le comptage observé"""
     frequences = nucleotide_frequency(sequence)
     abscisse   = comptage_attendu(frequences, k, len(sequence))
     ordonnee   = count_word(k, sequence)
@@ -138,6 +139,15 @@ def graphique(k, sequence):
     plt.ylabel("Nombre d'occurences observées")
     plt.legend()
     plt.show()
+    """la boucle suivante affiche les motifs dont le nombre d'occurences 
+    réel est nettement supérieur au nombre d'occurences attendu
+    dans la séquence"""
+    dico={}
+    dico["Motifs"]=[]
+    for cle in ordonnee.keys():
+        if(ordonnee[cle]>10*(abscisse[cle]+1)):
+            dico["Motifs"].append(cle)
+    print(dico)
 
 def simule_sequence(lg, m):
     """simule séquence renvoie une séquence de 
